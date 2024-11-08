@@ -1,6 +1,6 @@
 ### Hi there 👋
 
-I write software. Sometimes Go.
+I write software. Sometimes Go. I use Arch + Hyprland and drive Nvim with Tmux
 
 <details>
   <summary>my github stats</summary>
