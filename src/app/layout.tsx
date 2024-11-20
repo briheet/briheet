@@ -15,7 +15,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Briheet's Homepage",
+  title: "brsy :)",
   description: "Briheet Singh Yadav's Homepage",
 };
 
