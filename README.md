@@ -1,8 +1,11 @@
 ### Hi there 👋
 
-I write software. Sometimes Go. I use Arch + Hyprland and drive Nvim with Tmux
+I write software. Sometimes Go. I use Nix. I like Nix.
 
 <details>
+<!-- <a href="https://github.com/briheet/github-profile-views-counter"> -->
+<!--     <img src="https://komarev.com/ghpvc/?username=antonkomarev&style=for-the-badge"> -->
+<!-- </a> -->
   <summary>my github stats</summary>
 <p align="center">
 <a href="https://github.com/briheet">
