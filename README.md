@@ -1,6 +1,6 @@
 ### Hi there 👋
 
-I write software. Sometimes Go. I use Nix. I like Nix.
+I write software. Sometimes Go. I use Arch btw.
 
 <details>
 <!-- <a href="https://github.com/briheet/github-profile-views-counter"> -->
