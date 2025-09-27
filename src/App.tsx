@@ -3,7 +3,7 @@ import ProfileImage from "./components/profile-image";
 
 export function App() {
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen w-full text-foreground">
       <Navbar />
       <main>
         <ProfileImage />

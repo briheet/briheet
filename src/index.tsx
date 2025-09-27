@@ -4,9 +4,11 @@ import index from "./index.html";
 const server = serve({
   routes: {
     // Serve static files from public directory
-    "/public/profile-image.png": {
-      GET() {
-        return new Response(Bun.file("public/profile-image.png"));
+    "/public/*": {
+      GET(req) {
+        const url = new URL(req.url);
+        const filename = url.pathname.replace("/public/", "");
+        return new Response(Bun.file(`public/${filename}`));
       }
     },
 
