@@ -7,7 +7,7 @@ const Navbar = () => {
         <a
           href="#blogs"
           className={cn(
-            "text-lg font-medium transition-all duration-300 ease-out",
+            "text-base font-medium transition-all duration-300 ease-out",
             "text-foreground/70 hover:text-foreground hover:scale-105"
           )}
           style={{ fontFamily: 'Rubik Burned, cursive' }}
@@ -17,7 +17,7 @@ const Navbar = () => {
         <a
           href="#images"
           className={cn(
-            "text-lg font-medium transition-all duration-300 ease-out",
+            "text-base font-medium transition-all duration-300 ease-out",
             "text-foreground/70 hover:text-foreground hover:scale-105"
           )}
           style={{ fontFamily: 'Rubik Burned, cursive' }}
