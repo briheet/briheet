@@ -2,15 +2,11 @@
   "buildCommand": "bun run build",
   "outputDirectory": "dist",
   "framework": null,
+  "installCommand": "bun install",
   "rewrites": [
     {
       "source": "/(.*)",
       "destination": "/index.html"
     }
-  ],
-  "functions": {
-    "api/hello.js": {
-      "runtime": "nodejs18.x"
-    }
-  }
+  ]
 }
