@@ -6,7 +6,7 @@ const ProfileImage = () => {
       <div className="absolute top-28 left-80">
         <div className="relative w-64 h-64">
           <img
-            src="/profile-image.png"
+            src="/public/profile-image.png"
             alt="Profile"
             className="w-full h-full object-cover"
             style={{

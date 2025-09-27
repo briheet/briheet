@@ -4,7 +4,7 @@ import index from "./index.html";
 const server = serve({
   routes: {
     // Serve static files from public directory
-    "/profile-image.png": {
+    "/public/profile-image.png": {
       GET() {
         return new Response(Bun.file("public/profile-image.png"));
       }
