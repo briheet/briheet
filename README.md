@@ -1,16 +1,21 @@
-### Hi there 👋
+# bun-react-tailwind-shadcn-template
 
-I write software. Sometimes Go. I use Arch btw.
+To install dependencies:
 
-<details>
-<!-- <a href="https://github.com/briheet/github-profile-views-counter"> -->
-<!--     <img src="https://komarev.com/ghpvc/?username=antonkomarev&style=for-the-badge"> -->
-<!-- </a> -->
-  <summary>my github stats</summary>
-<p align="center">
-<a href="https://github.com/briheet">
-  <img height="180em" src="https://github-readme-stats-eight-theta.vercel.app/api?username=briheet&show_icons=true&theme=algolia&include_all_commits=true&count_private=true"/>
-  <!-- <img height="180em" src="https://github-readme-stats-eight-theta.vercel.app/api/top-langs/?hide=jupyternotebook,shell,logos,html,css&username=briheet&layout=compact&langs_count=8&theme=algolia"/> -->
-</a>
-</p>
-</details>
+```bash
+bun install
+```
+
+To start a development server:
+
+```bash
+bun dev
+```
+
+To run for production:
+
+```bash
+bun start
+```
+
+This project was created using `bun init` in bun v1.2.22. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
