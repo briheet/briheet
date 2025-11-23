@@ -1,6 +1,6 @@
 ### Hi there 👋
 
-I like writing Go, Rust. I use nix-darwin btw ;-;
+I like writing Go, Zig. I use nix-darwin btw ;-;
 
 <details>
   <summary>my github stats</summary>
