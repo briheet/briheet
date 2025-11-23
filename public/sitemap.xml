@@ -2,28 +2,28 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>http://localhost:1313/blogs/</loc>
+    <loc>https://www.briheet.com/blogs/</loc>
     <lastmod>2025-11-23T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/categories/blogs/</loc>
+    <loc>https://www.briheet.com/categories/blogs/</loc>
     <lastmod>2025-11-23T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/blogs/zig-build-nix-shell/</loc>
+    <loc>https://www.briheet.com/blogs/zig-build-nix-shell/</loc>
     <lastmod>2025-11-23T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/categories/</loc>
+    <loc>https://www.briheet.com/categories/</loc>
     <lastmod>2025-11-23T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/</loc>
+    <loc>https://www.briheet.com/</loc>
     <lastmod>2025-11-23T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/nix/</loc>
+    <loc>https://www.briheet.com/tags/nix/</loc>
     <lastmod>2025-11-23T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/</loc>
+    <loc>https://www.briheet.com/tags/</loc>
     <lastmod>2025-11-23T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/zig/</loc>
+    <loc>https://www.briheet.com/tags/zig/</loc>
     <lastmod>2025-11-23T00:00:00+00:00</lastmod>
   </url>
 </urlset>
