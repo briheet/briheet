@@ -34,4 +34,4 @@ weight = 1
 [params]
 custom_css = ["css/theme-override.css"]
 description = "A simple, minimal blog for those who love text."
-footer = "[Github](https://github.com/briheet) | [X](https://x.com/brsy_10) | [Linkedin](https://www.linkedin.com/in/briheet-singh-yadav/) | [Resume](https://drive.google.com/file/d/1bV-Mwxg_FAKe0rIp1-YmNlY1BAmIIZk7/view?usp=sharing)"
+footer = "[Github](https://github.com/briheet) | [X](https://x.com/brsy_10) | [Linkedin](https://www.linkedin.com/in/briheet-singh-yadav/)"
