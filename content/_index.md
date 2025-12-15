@@ -3,12 +3,12 @@ title: Home
 description: "The personal writings and expressions of Briheet."
 ---
 
-<img
-  id="foxy"
-  src="/images/profile_picture.png"
-  alt="Me, sleep-deprived and existing">
+<!-- <img -->
+  <!-- id="foxy" -->
+  <!-- src="/images/profile_picture.png" -->
+  <!-- alt="Me, sleep-deprived and existing"> -->
 
-Yes, that pfp is me, apparently fueled by crazy dose of Jägermeister, would not recommend as a lifestyle, 11/10 experience.
+<!-- Yes, that pfp is me, apparently fueled by crazy dose of Jägermeister, would not recommend as a lifestyle, 11/10 experience. -->
 
 ## Hey there
 
