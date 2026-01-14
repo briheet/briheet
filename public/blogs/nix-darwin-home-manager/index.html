@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+    <link rel="manifest" href="/images/site.webmanifest">
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Notes on setting up a Nix-Darwin &#43; Home Manager setup on a fresh macOS installation.">
+    <title>Nix-darwin Home-Manager setup on a fresh macOS. | Home</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/fonts.css" />
+    <link rel="stylesheet" href="https://www.briheet.com/css/theme-override.css">
+    
+  </head>
+
+  <body>
+    <header>
+      <nav>
+        <ul>
+          
+          
+          <li class="pull-left ">
+            <a href="https://www.briheet.com/">~/home</a>
+          </li>
+          
+          
+          <li class="pull-left current">
+            <a href="/blogs/">~/blogs</a>
+          </li>
+          
+
+          
+
+        </ul>
+      </nav>
+    </header>
+
+
+<div class="article-meta">
+<h1><span class="title">Nix-darwin Home-Manager setup on a fresh macOS.</span></h1>
+
+<h2 class="date">2026/01/14</h2>
+<p class="terms">
+  
+  
+  Categories: <a href="/categories/blogs">blogs</a> 
+  
+  
+  
+  Tags: <a href="/tags/nix">Nix</a> <a href="/tags/nix-darwin">Nix-darwin</a> <a href="/tags/macos">MacOS</a> <a href="/tags/home-manager">Home-Manager</a> 
+  
+  
+</p>
+</div>
+
+
+
+<div class="content-wrapper">
+  <main>
+    <h1 id="intro">Intro</h1>
+<p>Hey, how&rsquo;s it going? Hope you&rsquo;re doing well ☺️<br>
+Recently, a bunch of my friends hopped onto either MacOS or NixOS.</p>
+<p>MacOS ones either did due to the fact their orgs provided them apple silicon, their daddy suddenly became rich or they somehow found a sugar momma/dada.<br>
+NixOS ones did so either because they were long-time Arch users or just hopped onto the NixOS bandwagon because it’s cool (canon event).</p>
+<p>So anyways they have been pestering me with the facts see me too weird things from terminal, helping not install a lot of things, managing my config, nix-shell tmp pulls, yade yade yada.<br>
+Hence they all asked me to setup their system or guide them to. Also my system had some previous issues due to which i had being facing some errors. Hence i thought i would do a clean system install and explain the way, the process.</p>
+<p>Please note a few things before starting:</p>
+<ul>
+<li>This isn&rsquo;t a nix-darwin home manager explanation blog. I would be explaining as little as possible because i have been looking for a job atm and dont want to spend much time. Would keep updating this in future with infos.</li>
+<li>To keep things short, i would be only doing Nix-darwin, i dont have a Linux installation with me atm, i am travelling to northeast rn.</li>
+</ul>
+<p>Some of the things installed with this would be</p>
+<ul>
+<li>Kitty, Fish, Helix and a bunch of tools such as docker, hyperfine, etc. that i daily use.</li>
+</ul>
+<p>Hell yeah then lets start looking into it.</p>
+<h1 id="setting-up-the-macos">Setting up the MacOS</h1>
+<p>So on a fresh install, we have a pretty clean system. You can also do this on a regular system if you cant do a fresh install but i am too autistic to continue on a regular one.</p>
+<p>First thing to do is to open a terminal and type git and press enter. You would later need this to clone repo. Open spotlight and search terminal and you would get the default one.
+Now type
+You would see a pop up saying xcode commandline tools not installed. Please install it.
+Now you should have everything for a install from MacOS side.</p>
+<h1 id="installing-nix">Installing Nix</h1>
+<p>To setup Nix-darwin, we need to install nix first. This would do a bunch of things such as creating user, volumes, etc.
+This is the <a href="https://nix.dev/install-nix.html">link</a>
+<img src="install-nix.png" alt="Install Nix"></p>
+<p>Cool. During installation you may face a filesystem/vault error i suppose. I don&rsquo;t but this popped up on Tahoe 26.2. The easy fix is too reboot the system. Solves it. This is the photo for that issue <img src="nix-install-issue.png" alt="Nix-install Issue"></p>
+<h1 id="setting-up-nix-darwin">Setting up Nix-Darwin</h1>
+<p>Our next target would be setting up Nix-Darwin. For this head over to this repo <a href="https://github.com/nix-darwin/nix-darwin">Nix-darwin Repo</a>.
+<img src="nix-darwin-repo.png" alt="Nix-darwin Repo pic"></p>
+<p>Scrool down, you will find two options. Flakes and channels. We will only focus on flakes for this. Lets go through the 3 steps solo. <img src="nix-darwin-steps.png" alt="Nix-darwin 3 steps"></p>
+<h2 id="creating-flakenix">Creating flake.nix</h2>
+<p>If you want to independently setup your own flake you can follow it. In this blog i would be using my own nix config. Its comes this flake, system and module separation with added home manager for configuration + macos configurations such as networking, docs, keybinds, etc.</p>
+<h2 id="installing-nix-darwin">Installing nix-darwin</h2>
+<p>I tried running &lsquo;sudo nix run nix-darwin/master#darwin-rebuild &ndash; switch&rsquo; but somehow it always asked to add NIX-PATH and -I it which was cumbersome. Hence i moved to next move and combined it my system setup directly.</p>
+<h2 id="using-nix-darwin">Using Nix-Darwin</h2>
+<p>Remember i told ya i had a issue with Nix path, hence i moved it directly to this part.</p>
+<p>Now would like to explain you some things you need to know. If you are using a new configuration you can skip this paragraph and continue ahead. Else, please read this.</p>
+<p>In my configuration, i have setup my home directory at &lsquo;/Users/briheet&rsquo; and <a href="https://github.com/briheet/nix-config/blob/11a822c7e8f84f0fe656a1ccf6033ffade749a97/systems/darwin/configuration.nix#L47">Github line</a> and also here <a href="https://github.com/briheet/nix-config/blob/11a822c7e8f84f0fe656a1ccf6033ffade749a97/systems/darwin/configuration.nix#L59">Github line 2</a>.
+Also here <a href="https://github.com/briheet/nix-config/blob/11a822c7e8f84f0fe656a1ccf6033ffade749a97/systems/darwin/home.nix#L11">Github link 3</a>.
+You need to check your own home directory and change the name from &lsquo;briheet&rsquo; to your own home directory name. This is a preferable setting.
+Now do this git clone command in your directory to clone the repo.</p>
+<pre tabindex="0"><code>git clone https://github.com/briheet/nix-config
+</code></pre><p>this is our nix-config we would be using. After cloning open the file with your text editor. The only text editor i know that was working was vim. Please use vim to edit the names in folder to your specific machine.
+Now, run this command to setup the stuff.</p>
+<pre tabindex="0"><code>sudo nix run --extra-experimental-features &#34;nix-command flakes&#34; nix-darwin#darwin-rebuild -- switch --flake .#makima
+</code></pre><p>This would show you 6 gb of data downloading. Let it be done. After its done, restart the system and use spotlight to open kitty. Kitty would open with fish and all the things loaded.</p>
+<p>Now this is the paragraph if you went other way with new configuration. Follow the steps given in the repo, those are honestly pretty fine to setup.
+You would maybe face the issue with nix-command and flake. This is because they are experimental. You would need to pass something like &rsquo;nix run &ndash;extra-experimental-features &ldquo;nix-command flakes&rdquo; nix-darwin#darwin-rebuild &ndash; switch&rsquo; to make it work. Please use chatgpt to solve issues if so.</p>
+<h1 id="finish-installing">Finish installing</h1>
+<p>Your install should be finish and working fine. From next time whenever you made changes in your nix-config, always do</p>
+<pre tabindex="0"><code>sudo darwin-rebuild switch --flake .
+</code></pre><p>Also make sure you are into the directory where flake is located to make it rebuild.</p>
+<p>Now go to <a href="https://wallhaven.cc/toplist">Wallhaven</a> and grab yourself some noice anime waifu pics for your wallpaper and set it up as background image in your system.</p>
+<p>This is something what i ended up with for now.
+<img src="new-system-pic-one.png" alt="Pic one">
+<img src="new-system-pic-two.png" alt="Pic two">
+<img src="new-system-pic-three.png" alt="Pic three"></p>
+<h1 id="end-notes">End notes</h1>
+<p>Do rice, modify your system however you like, the whole point is to enjoy.
+For MacOS configs, visit this <a href="https://nix-darwin.github.io/nix-darwin/manual/">Site</a>
+For Home Manager configs, visit this site <a href="https://nix-community.github.io/home-manager/options.xhtml">Site</a> or this for fast searching <a href="https://home-manager-options.extranix.com">Site</a>
+For Searching in Nix packages, visit this <a href="https://search.nixos.org/packages">Site</a></p>
+<p>Also please read through the config files, they are somewhat good built, well separated. For new configs files, added them in folder hierachy and update the home.nix file.</p>
+<p>If you have any queries, please reach me out through X, discord or wherever you want. The IRL configs are there in my Resume. Happy ricing.</p>
+
+    <a href="/"> >> Home</a>
+  </main>
+</div>
+    <footer>
+      
+      
+      <script>
+      (function() {
+        function center_el(tagName) {
+          var tags = document.getElementsByTagName(tagName), i, tag;
+          for (i = 0; i < tags.length; i++) {
+            tag = tags[i];
+            var parent = tag.parentElement;
+            
+            if (parent.childNodes.length === 1) {
+              
+              if (parent.nodeName === 'A') {
+                parent = parent.parentElement;
+                if (parent.childNodes.length != 1) continue;
+              }
+              if (parent.nodeName === 'P') parent.style.textAlign = 'center';
+            }
+          }
+        }
+        var tagNames = ['img', 'embed', 'object'];
+        for (var i = 0; i < tagNames.length; i++) {
+          center_el(tagNames[i]);
+        }
+      })();
+      </script>
+
+      
+      <hr/>
+      <a target="_blank" rel="noopener noreferrer" href="https://github.com/briheet">Github</a> | <a target="_blank" rel="noopener noreferrer" href="https://x.com/brsy_10">X</a> | <a target="_blank" rel="noopener noreferrer" href="https://www.linkedin.com/in/briheet-singh-yadav/">Linkedin</a> | <a target="_blank" rel="noopener noreferrer" href="https://drive.google.com/file/d/1bV-Mwxg_FAKe0rIp1-YmNlY1BAmIIZk7/view">Resume</a>
+      
+    </footer>
+  </body>
+</html>
+

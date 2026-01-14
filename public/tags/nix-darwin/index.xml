@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Nix-Darwin on Home</title>
+    <link>https://www.briheet.com/tags/nix-darwin/</link>
+    <description>Recent content in Nix-Darwin on Home</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Wed, 14 Jan 2026 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://www.briheet.com/tags/nix-darwin/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Nix-darwin Home-Manager setup on a fresh macOS.</title>
+      <link>https://www.briheet.com/blogs/nix-darwin-home-manager/</link>
+      <pubDate>Wed, 14 Jan 2026 00:00:00 +0000</pubDate>
+      <guid>https://www.briheet.com/blogs/nix-darwin-home-manager/</guid>
+      <description>&lt;h1 id=&#34;intro&#34;&gt;Intro&lt;/h1&gt;&#xA;&lt;p&gt;Hey, how&amp;rsquo;s it going? Hope you&amp;rsquo;re doing well ☺️&lt;br&gt;&#xA;Recently, a bunch of my friends hopped onto either MacOS or NixOS.&lt;/p&gt;&#xA;&lt;p&gt;MacOS ones either did due to the fact their orgs provided them apple silicon, their daddy suddenly became rich or they somehow found a sugar momma/dada.&lt;br&gt;&#xA;NixOS ones did so either because they were long-time Arch users or just hopped onto the NixOS bandwagon because it’s cool (canon event).&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>
