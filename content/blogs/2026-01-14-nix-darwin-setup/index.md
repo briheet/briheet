@@ -101,10 +101,10 @@ This is something what i ended up with for now.
 
 # End notes
 
-Do rice, modify your system however you like, the whole point is to enjoy.
-For MacOS configs, visit this [Site](https://nix-darwin.github.io/nix-darwin/manual/)
-For Home Manager configs, visit this site [Site](https://nix-community.github.io/home-manager/options.xhtml) or this for fast searching [Site](https://home-manager-options.extranix.com)
-For Searching in Nix packages, visit this [Site](https://search.nixos.org/packages)
+Do rice, modify your system however you like, the whole point is to enjoy.\
+For MacOS configs, visit this [Site](https://nix-darwin.github.io/nix-darwin/manual/)\
+For Home Manager configs, visit this site [Site](https://nix-community.github.io/home-manager/options.xhtml) or this for fast searching [Site](https://home-manager-options.extranix.com)\
+For Searching in Nix packages, visit this [Site](https://search.nixos.org/packages)\
 
 Also please read through the config files, they are somewhat good built, well separated. For new configs files, added them in folder hierachy and update the home.nix file.
 
