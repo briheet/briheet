@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Rust on Home</title>
+    <link>https://www.briheet.com/tags/rust/</link>
+    <description>Recent content in Rust on Home</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sat, 14 Feb 2026 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://www.briheet.com/tags/rust/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Building a Persistent KV Store with B-epsilon Trees</title>
+      <link>https://www.briheet.com/blogs/db/</link>
+      <pubDate>Sat, 14 Feb 2026 00:00:00 +0000</pubDate>
+      <guid>https://www.briheet.com/blogs/db/</guid>
+      <description>&lt;h1 id=&#34;research-notes&#34;&gt;Research Notes&lt;/h1&gt;&#xA;&lt;p&gt;I want to build a persistent key-value store based on B-epsilon trees.&#xA;I looked at LevelDB but it&amp;rsquo;s written in C++, which isn&amp;rsquo;t my preference. So I decided to write this in Rust since I haven&amp;rsquo;t touched it in a while.&#xA;I&amp;rsquo;m also a bit tired of Go at this point due to its syntax, error handling, and GC overhead.&lt;/p&gt;&#xA;&lt;h2 id=&#34;understanding-lsm-trees&#34;&gt;Understanding LSM Trees&lt;/h2&gt;&#xA;&lt;p&gt;I started by learning about LSM trees. ScyllaDB has a good introductory article on it:&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

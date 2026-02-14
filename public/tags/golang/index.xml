@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Golang on Home</title>
+    <link>https://www.briheet.com/tags/golang/</link>
+    <description>Recent content in Golang on Home</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sat, 07 Feb 2026 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://www.briheet.com/tags/golang/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Mentor Notes for Golang</title>
+      <link>https://www.briheet.com/blogs/golang/</link>
+      <pubDate>Sat, 07 Feb 2026 00:00:00 +0000</pubDate>
+      <guid>https://www.briheet.com/blogs/golang/</guid>
+      <description>&lt;h2 id=&#34;before-you-start&#34;&gt;Before You Start&lt;/h2&gt;&#xA;&lt;p&gt;I&amp;rsquo;ve never had mentors, coaches, or seniors telling me what to do. Most of my knowledge comes from reading open source projects, source code, rewriting stuff on my own, reading blogs, watching conferences, picking up words, searching them, and going deep. The only hand I had from someone was my dad when I was 9-10, when he introduced me to terminals (that&amp;rsquo;s a story for another blog).&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>
