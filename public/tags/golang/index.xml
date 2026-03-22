@@ -6,14 +6,14 @@
     <description>Recent content in Golang on Home</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 07 Feb 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 21 Mar 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://www.briheet.com/tags/golang/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>Mentor Notes for Golang</title>
-      <link>https://www.briheet.com/blogs/golang/</link>
-      <pubDate>Sat, 07 Feb 2026 00:00:00 +0000</pubDate>
-      <guid>https://www.briheet.com/blogs/golang/</guid>
-      <description>&lt;h2 id=&#34;before-you-start&#34;&gt;Before You Start&lt;/h2&gt;&#xA;&lt;p&gt;I&amp;rsquo;ve never had mentors, coaches, or seniors telling me what to do. Most of my knowledge comes from reading open source projects, source code, rewriting stuff on my own, reading blogs, watching conferences, picking up words, searching them, and going deep. The only hand I had from someone was my dad when I was 9-10, when he introduced me to terminals (that&amp;rsquo;s a story for another blog).&lt;/p&gt;</description>
+      <title>Fear is Necessary for Optimisation (goylang edition)</title>
+      <link>https://www.briheet.com/blogs/golang-optimisations/</link>
+      <pubDate>Sat, 21 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://www.briheet.com/blogs/golang-optimisations/</guid>
+      <description>&lt;h2 id=&#34;presentation-slides&#34;&gt;Presentation Slides&lt;/h2&gt;&#xA;&lt;embed src=&#34;./presentation.pdf&#34; type=&#34;application/pdf&#34; width=&#34;100%&#34; height=&#34;600px&#34;&gt;&#xA;&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;./presentation.pdf&#34;&gt;Download PDF&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;&#xA;&lt;h1 id=&#34;overview&#34;&gt;Overview&lt;/h1&gt;&#xA;&lt;p&gt;Hey guys, how you guys doing? &lt;br&gt;&#xA;Since a few days some people asked me what I usually do at work. My answers usually caters differently as the population pool contains juniors, colleagues, seniors, whamens i need to rizz, parents and relatives, etc. \&lt;/p&gt;&#xA;&lt;p&gt;So I decided, why not write a small write-up for it. At the same time one of my juniors asked me to give a talk on it to a community he is a part of so was like,&#xA;why not (this took the whole Saturday and Sunday to compile &amp;#x1f62d;).&lt;/p&gt;</description>
     </item>
   </channel>
 </rss>

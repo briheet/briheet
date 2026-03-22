@@ -2,22 +2,40 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>https://www.briheet.com/tags/assembly/</loc>
+    <lastmod>2026-03-21T00:00:00+00:00</lastmod>
+  </url><url>
     <loc>https://www.briheet.com/blogs/</loc>
-    <lastmod>2026-02-14T00:00:00+00:00</lastmod>
+    <lastmod>2026-03-21T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://www.briheet.com/categories/blogs/</loc>
-    <lastmod>2026-02-14T00:00:00+00:00</lastmod>
+    <lastmod>2026-03-21T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://www.briheet.com/categories/</loc>
+    <lastmod>2026-03-21T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://www.briheet.com/blogs/golang-optimisations/</loc>
+    <lastmod>2026-03-21T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://www.briheet.com/tags/golang/</loc>
+    <lastmod>2026-03-21T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://www.briheet.com/</loc>
+    <lastmod>2026-03-21T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://www.briheet.com/tags/optimisation/</loc>
+    <lastmod>2026-03-21T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://www.briheet.com/tags/profilers/</loc>
+    <lastmod>2026-03-21T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://www.briheet.com/tags/</loc>
+    <lastmod>2026-03-21T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://www.briheet.com/blogs/db/</loc>
     <lastmod>2026-02-14T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://www.briheet.com/categories/</loc>
-    <lastmod>2026-02-14T00:00:00+00:00</lastmod>
-  </url><url>
     <loc>https://www.briheet.com/tags/databases/</loc>
-    <lastmod>2026-02-14T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://www.briheet.com/</loc>
     <lastmod>2026-02-14T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://www.briheet.com/tags/kv/</loc>
@@ -27,9 +45,6 @@
     <lastmod>2026-02-14T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://www.briheet.com/tags/rust/</loc>
-    <lastmod>2026-02-14T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://www.briheet.com/tags/</loc>
     <lastmod>2026-02-14T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://www.briheet.com/tags/home-manager/</loc>

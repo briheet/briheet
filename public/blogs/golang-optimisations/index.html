@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+    <link rel="manifest" href="/images/site.webmanifest">
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="An entry guide to optimise your golang programs to make it fast. Small, easy, proven methods to make programs better.">
+    <title>Fear is Necessary for Optimisation (goylang edition) | Home</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/fonts.css" />
+    <link rel="stylesheet" href="https://www.briheet.com/css/theme-override.css">
+    
+  </head>
+
+  <body>
+    <header>
+      <nav>
+        <ul>
+          
+          
+          <li class="pull-left ">
+            <a href="https://www.briheet.com/">~/home</a>
+          </li>
+          
+          
+          <li class="pull-left current">
+            <a href="/blogs/">~/blogs</a>
+          </li>
+          
+
+          
+
+        </ul>
+      </nav>
+    </header>
+
+
+<div class="article-meta">
+<h1><span class="title">Fear is Necessary for Optimisation (goylang edition)</span></h1>
+
+<h2 class="date">2026/03/21</h2>
+<p class="terms">
+  
+  
+  Categories: <a href="/categories/blogs">blogs</a> 
+  
+  
+  
+  Tags: <a href="/tags/golang">Golang</a> <a href="/tags/optimisation">Optimisation</a> <a href="/tags/profilers">Profilers</a> <a href="/tags/assembly">Assembly</a> 
+  
+  
+</p>
+</div>
+
+
+
+<div class="content-wrapper">
+  <main>
+    <h2 id="presentation-slides">Presentation Slides</h2>
+<embed src="./presentation.pdf" type="application/pdf" width="100%" height="600px">
+<p><strong><a href="./presentation.pdf">Download PDF</a></strong></p>
+<h1 id="overview">Overview</h1>
+<p>Hey guys, how you guys doing? <br>
+Since a few days some people asked me what I usually do at work. My answers usually caters differently as the population pool contains juniors, colleagues, seniors, whamens i need to rizz, parents and relatives, etc. \</p>
+<p>So I decided, why not write a small write-up for it. At the same time one of my juniors asked me to give a talk on it to a community he is a part of so was like,
+why not (this took the whole Saturday and Sunday to compile &#x1f62d;).</p>
+<p>Also disclaimer, there are hundreds of places where there are different tricks to optimise so we aren’t going to talk about all of that here.
+Also this blog should be paired with a good understanding of golang, it would really help but that&rsquo;s the scope of another blog.</p>
+<h1 id="introduction">Introduction</h1>
+<p>This write up will consist of some theory and more examples. We will talk about tools, tricks, ways to write better code.
+Additionally, will be adding a GitHub repo at the end so as to refer to the examples and test and verify by your own. <br>
+We will be analyzing our code and trying to make it better step by step. Finding problems would be the first and then trying to solve them.</p>
+<h2 id="things-that-bother-us">Things that bother us</h2>
+<p>First of all let&rsquo;s get into it. Why do we need to optimise our code? What&rsquo;s the reason? Why is your manager saying to make it as low latency as possible?</p>
+<p>Here comes the word latency. So what is latency? Ask IBM and they will tell it&rsquo;s the delay in a system. And that&rsquo;s true.
+Let&rsquo;s say I want some order to execute, due to things being over the network, I/O, heap allocations, etc. I can&rsquo;t get it done on the spot, it will take some time to reach some co-located server and execute stuff there.</p>
+<p>So what causes this latency at all? Why is it there? Let&rsquo;s rule out things we don&rsquo;t have in hand and focus on programs coz we only control programs &#x1f62d; (I hope you guys write code by your hand)</p>
+<p>Things that bug us:</p>
+<ul>
+<li>I/O operations</li>
+<li>Synchronizations</li>
+<li>Heap allocations</li>
+<li>GC Pressure</li>
+</ul>
+<p>So what do we want from our programs really? Reduce overhead of I/O operations, reduce heap allocations, lower down GC pressure, etc.</p>
+<h2 id="basics-and-its-working">Basics and its working</h2>
+<p>SO essentially when we run a golang project, we allocate sum memory, compute something and output something. Where does all that happen ? Lets take a look at it.</p>
+<p><img src="./memory/short_golang_program_sum.png" alt="Simple program"></p>
+<p>This is a simple golang program, it makes a slice, sends it to compute something and gets back the answer. Pretty cool right.
+Now lets read how the whole program flows. For this we will use a golang gui to read assembly called <a href="https://github.com/loov/lensm">lensm</a></p>
+<p><img src="./memory/wholesome_lensm_output_memory.png" alt="Generate stuff"></p>
+<p>As you can see our program does a lot of things. Let me take you line by line on what it is doing and at the end i will explain you the wholesome way on why something. <br>
+Also make sure i am building and objdumping on apple silicon hence these are arm stuff.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-asm" data-lang="asm"><span style="display:flex;"><span><span style="color:#a6e22e">MOVD</span> <span style="color:#ae81ff">16</span>(<span style="color:#66d9ef">R28</span>), <span style="color:#66d9ef">R16</span>                    <span style="color:#75715e">// ldr x16, [x28,#16]
+</span></span></span></code></pre></div><p>MOVD is a Go assembler pseudo-instruction. The core ARM64 MOV instructions from the manual are these.
+<img src="./memory/core_mov_instructions.png" alt="Core MOV instructions"></p>
+<p>So what golang does is that it implements a bunch of things different from the main instructions.</p>
+<p>If you have seen the talk by Rob Pike on how they moved to Go packages for linking
+stuff, you will get why golang does this. This also helps in supporting various different machines and keeping it portable. <br>
+This design helps keep the assembler simple, and along with other reasons, Go tends to compile fast. <br>
+Here is the link to the talk if you&rsquo;re interested. <a href="https://youtu.be/KINIAgRpkDA?si=VEL23ZQdlsDyYipN">Design of the golang assmebler</a></p>
+<p>So you can go to the official package docs: <a href="https://pkg.go.dev/cmd/internal/obj/arm64">Official package</a></p>
+<p>Golang implements MOV in variants. <br>
+64-bit variant ldr, str, stur =&gt; MOVD; <br>
+32-bit variant str, stur, ldrsw =&gt; MOVW; <br>
+32-bit variant ldr =&gt; MOVWU; ldrb =&gt; MOVBU; ldrh =&gt; MOVHU; ldrsb, sturb, strb =&gt; MOVB; ldrsh, sturh, strh =&gt; MOVH. \</p>
+<p>So as we are on a 64 bit arm machine, our golang program uses MOVD to load and store. So now you can map</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-asm" data-lang="asm"><span style="display:flex;"><span><span style="color:#75715e">; 64-bit variant ldr, str, stur =&gt; MOVD;
+</span></span></span><span style="display:flex;"><span><span style="color:#a6e22e">MOVD</span> <span style="color:#ae81ff">16</span>(<span style="color:#66d9ef">R28</span>), <span style="color:#66d9ef">R16</span>                    <span style="color:#75715e">// ldr x16, [x28,#16]
+</span></span></span></code></pre></div><p>It goes to function asmout to this switch <img src="./memory/movd_ldr_switch.png" alt="Switch 21"> which then calculates offset+size and then checks simm (LDUR) or imm (LDR).
+Then when calling c.opldr we get AMOVD which returns base opcodes <img src="./memory/opldr_base_opcodes.png" alt="See this"> and then we call olsr12u which encodes the imm and sets the unsigned-offset bit (some fuckery I am not that intelligent)
+and returns back a uint32 <img src="./memory/oslr12u.png" alt="See this"></p>
+<p>So now you would ask why R28 briheet? If you read the golang assembler manual, you&rsquo;ll see it is reserved by the compiler and linker. If you read the Go ABI, R28 is the current goroutine
+pointer. <img src="./memory/go_abi_arm.png" alt="See this"></p>
+<p>So to summarize, the operation listed below</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-asm" data-lang="asm"><span style="display:flex;"><span><span style="color:#a6e22e">MOVD</span> <span style="color:#ae81ff">16</span>(<span style="color:#66d9ef">R28</span>), <span style="color:#66d9ef">R16</span>                    <span style="color:#75715e">// ldr x16, [x28,#16]
+</span></span></span><span style="display:flex;"><span><span style="color:#a6e22e">CMP</span> <span style="color:#66d9ef">R16</span>, <span style="color:#66d9ef">RSP</span>                         <span style="color:#75715e">// cmp sp, x16
+</span></span></span><span style="display:flex;"><span><span style="color:#a6e22e">BLS</span> <span style="color:#ae81ff">36</span>(<span style="color:#66d9ef">PC</span>)                           <span style="color:#75715e">// b.ls .+0x90
+</span></span></span></code></pre></div><p>means that the current main function starts as a goroutine (check R28 is the current goroutine) and during the start it loads g.stackguard0 into R16 (see the Go ABI pic above). Then we use CMP to compare that stack guard limit with RSP (stack pointer) to see if the stack is safe or if we need to grow it.
+That’s why you will see there is a branch coming out of BLS below, it calls runtime.morestack_noctxt.abi0(SB) and then jumps back to main.main. <img src="./memory/go_stack_increase_runtime_jump.png" alt="See this"></p>
+<p>So the flow is:</p>
+<ul>
+<li>R28 = current goroutine (g)</li>
+<li>MOVD 16(R28), R16 loads g.stackguard0</li>
+<li>CMP R16, SP checks if the current stack pointer is too close to the guard</li>
+<li>If it’s too close, it calls runtime.morestack to grow the goroutine’s stack</li>
+</ul>
+<p>As I said, R28 is the current goroutine in the Go ABI screenshot. So how does a goroutine look like or laid out that 16 offset on R28 (current goroutine) gives us the stack guard value?
+Here is the runtime stack layout in golang. <img src="./memory/g_struct.png" alt="Main g struct"> and <img src="./memory/lo_hi.png" alt="Embedded fields"></p>
+<p>So if you go down with +0, +8 and then +16, wait, there you have +16 on current goroutine (R28) gives you stackguard0.</p>
+<p>Hence i think now you can finally understand how instructions are laid out, Go ABI&rsquo;s, offset, asmout, linking, checks at compile time for runtime, program start and more.
+This is the 1% you need to know to understand the real depths of performance.
+Also for now i am gonna skip explaining all instructions and just write basic stuff as you can figure that out the way i have explained above, or else you should leave programming.
+jk ill add them in future.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-asm" data-lang="asm"><span style="display:flex;"><span><span style="color:#a6e22e">MOVD.W</span> <span style="color:#66d9ef">R30</span>, -<span style="color:#ae81ff">112</span>(<span style="color:#66d9ef">RSP</span>)                <span style="color:#75715e">// str x30, [sp,#-112]!
+</span></span></span><span style="display:flex;"><span><span style="color:#a6e22e">MOVD</span> <span style="color:#66d9ef">R29</span>, -<span style="color:#ae81ff">8</span>(<span style="color:#66d9ef">RSP</span>)                    <span style="color:#75715e">// stur x29, [sp,#-8]
+</span></span></span><span style="display:flex;"><span><span style="color:#a6e22e">SUB</span> <span style="color:#66d9ef">$8</span>, <span style="color:#66d9ef">RSP</span>, <span style="color:#66d9ef">R29</span>                     <span style="color:#75715e">// sub x29, sp, #0x8
+</span></span></span></code></pre></div><p>now we have these calls, but what does it mean. We can now read the abi and know that R30 is Link Register/Return address and RSP is Register stack pointer, but what is -112 and why  ?
+Lets look at the stack frame.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-asm" data-lang="asm"><span style="display:flex;"><span><span style="color:#a6e22e">ORR</span> <span style="color:#66d9ef">$1</span>, <span style="color:#66d9ef">ZR</span>, <span style="color:#66d9ef">R1</span>                       <span style="color:#75715e">// orr x1, xzr, #0x1
+</span></span></span><span style="display:flex;"><span><span style="color:#a6e22e">ORR</span> <span style="color:#66d9ef">$2</span>, <span style="color:#66d9ef">ZR</span>, <span style="color:#66d9ef">R2</span>                       <span style="color:#75715e">// orr x2, xzr, #0x2
+</span></span></span><span style="display:flex;"><span><span style="color:#a6e22e">STP</span> (<span style="color:#66d9ef">R1</span>, <span style="color:#66d9ef">R2</span>), <span style="color:#ae81ff">56</span>(<span style="color:#66d9ef">RSP</span>)                <span style="color:#75715e">// stp x1, x2, [sp,#56]
+</span></span></span><span style="display:flex;"><span><span style="color:#a6e22e">ORR</span> <span style="color:#66d9ef">$3</span>, <span style="color:#66d9ef">ZR</span>, <span style="color:#66d9ef">R2</span>                       <span style="color:#75715e">// orr x2, xzr, #0x3
+</span></span></span><span style="display:flex;"><span><span style="color:#a6e22e">ORR</span> <span style="color:#66d9ef">$4</span>, <span style="color:#66d9ef">ZR</span>, <span style="color:#66d9ef">R3</span>                       <span style="color:#75715e">// orr x3, xzr, #0x4
+</span></span></span><span style="display:flex;"><span><span style="color:#a6e22e">STP</span> (<span style="color:#66d9ef">R2</span>, <span style="color:#66d9ef">R3</span>), <span style="color:#ae81ff">72</span>(<span style="color:#66d9ef">RSP</span>)                <span style="color:#75715e">// stp x2, x3, [sp,#72]
+</span></span></span></code></pre></div><p>AS we can see that this is our slice building. ORR is a bitwise or operation. On arm64, it helps in loading in Register R1 as bitwise OR with zero is the same number (A OR 0 = A).
+Its the golang assembler choosing to move
+If i am not wrong MOV is also goes to ORR or ADD on arm. I am not a assembly programmer so no idea.</p>
+<p>So essentailly it takes 1 and second immdeiate values and moves both R1 and R2 in stack frame at 56 + register stack pointer.
+Then it does the same for next 2 values for moving them into 72 + register stack pointer.
+So here we can see that
+56 + 8 =&gt; 64, 64 + 8 =&gt; 72, 72 + 8 =&gt; 80, 80 + 8 =&gt; 88 <br>
+So thats 88 - 56 = 32; (4 * 8)</p>
+<p>Hence we can see that the numbers live at stack frame and according to bytes and we know there starting. \</p>
+<p>Now till here we can see why our programs in 88 right ? Now lets go ahead.</p>
+<p>+Now let’s look at the loop that sums the slice. This is the inlined <code>sum</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-asm" data-lang="asm"><span style="display:flex;"><span><span style="color:#a6e22e">MOVD</span> <span style="color:#66d9ef">ZR</span>, <span style="color:#66d9ef">R0</span>                          <span style="color:#75715e">;R0 = 0        (i = 0)
+</span></span></span><span style="display:flex;"><span><span style="color:#a6e22e">MOVD</span> <span style="color:#66d9ef">ZR</span>, <span style="color:#66d9ef">R2</span>                          <span style="color:#75715e">;R2 = 0        (sum = 0)
+</span></span></span><span style="display:flex;"><span><span style="color:#a6e22e">JMP</span> <span style="color:#ae81ff">5</span>(<span style="color:#66d9ef">PC</span>)                            <span style="color:#75715e">;jump to loop to check the condition
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">ADD</span> <span style="color:#66d9ef">$56</span>, <span style="color:#66d9ef">RSP</span>, <span style="color:#66d9ef">R3</span>                     <span style="color:#75715e">;R3 = SP + 56  (base address of the slice backing array)
+</span></span></span><span style="display:flex;"><span><span style="color:#a6e22e">MOVD</span> (<span style="color:#66d9ef">R3</span>)(<span style="color:#66d9ef">R0</span><span style="color:#960050;background-color:#1e0010">&lt;&lt;</span><span style="color:#ae81ff">3</span>), <span style="color:#66d9ef">R4</span>                 <span style="color:#75715e">;R4 = *(R3 + R0*8)  (load element i)
+</span></span></span><span style="display:flex;"><span><span style="color:#a6e22e">ADD</span> <span style="color:#66d9ef">R2</span>, <span style="color:#66d9ef">R4</span>, <span style="color:#66d9ef">R2</span>                       <span style="color:#75715e">;sum += element
+</span></span></span><span style="display:flex;"><span><span style="color:#a6e22e">ADD</span> <span style="color:#66d9ef">$1</span>, <span style="color:#66d9ef">R0</span>, <span style="color:#66d9ef">R0</span>                       <span style="color:#75715e">;i++
+</span></span></span><span style="display:flex;"><span><span style="color:#a6e22e">CMP</span> <span style="color:#66d9ef">$4</span>, <span style="color:#66d9ef">R0</span>                           <span style="color:#75715e">;compare i with 4 (len)
+</span></span></span><span style="display:flex;"><span><span style="color:#a6e22e">BLT</span> -<span style="color:#ae81ff">5</span>(<span style="color:#66d9ef">PC</span>)                           <span style="color:#75715e">;if i &lt; 4, jump back to loop body
+</span></span></span></code></pre></div><p>So in Go ways, its:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#a6e22e">sum</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span> &lt; <span style="color:#ae81ff">4</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">sum</span> <span style="color:#f92672">+=</span> <span style="color:#a6e22e">numbers</span>[<span style="color:#a6e22e">i</span>]
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Why the jump before the loop body? It’s a common pattern: initialize <code>i</code> and <code>sum</code>, then jump to the condition check, then loop back into the body if <code>i &lt; 4</code>.
+This prevents executing the body once before the first check.</p>
+<p>Why <code>R0&lt;&lt;3</code>? Each <code>int</code> is 8 bytes on 64‑bit, so <code>index * 8</code> gives the byte offset.
+<img src="https://tip.golang.org/src/cmd/compile/abi-internal" alt="Stack layout"></p>
+<p>Cool, I hope everything is fine till here. I hope you guys understand :), I can just hope.</p>
+<p>So now here comes the most weird part.
+If you are into systems and have written C++ or Rust code, or even seen the Datadog slide screenshot above, you would be knowing that heap escapes are the worst.
+The compiler has to fetch it first and the whole flow takes time.
+So when optimising the code we usually keep functions small and inlined (keep functions under cost 80) and reduce escapes to heap. \</p>
+<p>But check this out, a normal fmt.Println call does a call to runtime.convT64(SB) which is a call to Static Base. So essentially Static Base is for global symbols and functions. <br>
+<img src="./memory/runtime_call_print.png" alt="Runtime call pic"></p>
+<p>But why here? Turns out that calling fmt.Println(answer) causes interface boxing, which often makes the value escape and triggers a call to runtime.convT64.
+Check the implementation of <img src="./memory/convT64.png" alt="convT64">
+It calls at runtime and gives back a pointer to fmt.Println. But how can we remove this issue?</p>
+<p>If you see the implementation of fmt.Println</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#75715e">// It returns the number of bytes written and any write error encountered.</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">Println</span>(<span style="color:#a6e22e">a</span> <span style="color:#f92672">...</span><span style="color:#66d9ef">any</span>) (<span style="color:#a6e22e">n</span> <span style="color:#66d9ef">int</span>, <span style="color:#a6e22e">err</span> <span style="color:#66d9ef">error</span>) {
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">Fprintln</span>(<span style="color:#a6e22e">os</span>.<span style="color:#a6e22e">Stdout</span>, <span style="color:#a6e22e">a</span><span style="color:#f92672">...</span>)
+</span></span><span style="display:flex;"><span>} 
+</span></span></code></pre></div><p>it takes in any and any is an interface, hence what we see here is interface boxing.
+To remove this, we would need to write to os.Stdout.WriteString and use the strconv package to convert,
+but that also has runtime.StringFormatInt which also has a call to runtime.panicSlice so let&rsquo;s not go that way.</p>
+<p>So the point here was we can see interface store at</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-asm" data-lang="asm"><span style="display:flex;"><span><span style="color:#a6e22e">STP</span> (<span style="color:#66d9ef">ZR</span>, <span style="color:#66d9ef">ZR</span>), <span style="color:#ae81ff">88</span>(<span style="color:#66d9ef">RSP</span>)                <span style="color:#75715e">// stp xzr, xzr, [sp,#88]
+</span></span></span></code></pre></div><p>this at +16 as store for interface is value and its pointer. Hence now we have our RSP at 88 + 16 =&gt; 104. Not going into remaining it should be some func calls or so.</p>
+<h2 id="profiling">Profiling</h2>
+<h1 id="cpu-profilling">Cpu profilling</h1>
+<p>CPU profiling is measuring where your program spends CPU time. It records which functions and lines consume the most CPU cycles, so you know what to optimize.</p>
+<p>Lets start profiling some code and see what we have. I have added the code for this section on github at <a href="github.com/briheet/go_elixir_talk">Here</a></p>
+<p>So here is our golang program</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#f92672">package</span> <span style="color:#a6e22e">main</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> (
+</span></span><span style="display:flex;"><span>	<span style="color:#e6db74">&#34;fmt&#34;</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#e6db74">&#34;strings&#34;</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#e6db74">&#34;time&#34;</span>
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">start</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Now</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">result</span> <span style="color:#66d9ef">string</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">result</span> = <span style="color:#a6e22e">calculateResult</span>(<span style="color:#ae81ff">100_100</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;elapsed:&#34;</span>, <span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Since</span>(<span style="color:#a6e22e">start</span>))
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;length:&#34;</span>, len(<span style="color:#a6e22e">strings</span>.<span style="color:#a6e22e">Split</span>(<span style="color:#a6e22e">result</span>, <span style="color:#e6db74">&#34;,&#34;</span>)))
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">calculateResult</span>(<span style="color:#a6e22e">num</span> <span style="color:#66d9ef">int</span>) <span style="color:#66d9ef">string</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">result</span> <span style="color:#66d9ef">string</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">for</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">num</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">result</span> <span style="color:#f92672">+=</span> <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Sprintf</span>(<span style="color:#e6db74">&#34;item-%d,&#34;</span>, <span style="color:#a6e22e">i</span>)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">result</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Looks nice a normal program, but there are places this can we optimised. WHen running go build and ./cpu, we get about 2.7 seconds of time. Lets see this code. <br>
+The first thing is to write good tests for your program so things dont go other ways.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>❯ go run main.go
+</span></span><span style="display:flex;"><span>elapsed: 2.649227084s
+</span></span><span style="display:flex;"><span>length: <span style="color:#ae81ff">100101</span>
+</span></span></code></pre></div><p>So our initial runs show about 2.6 seconds of execution. Lets write some tests and check the issue then.
+<img src="./cpu/test.png" alt="Test"></p>
+<p>So our simple test runs fine, now lets write some benchmarks. <img src="./cpu/benchmark.png" alt="Benchmark"></p>
+<p>Lets run and check output.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>go test -bench<span style="color:#f92672">=</span>. -benchmem -benchtime<span style="color:#f92672">=</span>3s -count<span style="color:#f92672">=</span><span style="color:#ae81ff">10</span> -cpuprofile<span style="color:#f92672">=</span>cpu.pprof -memprofile<span style="color:#f92672">=</span>mem.pprof &gt; benchmark.txt
+</span></span></code></pre></div><p>This is typically a good way to benchmark. Lets me explain</p>
+<ol>
+<li>-bench=. tells you what functions you want. In this case it tells all. You can also write -bench=<Benchmark-function-name> and it will only benchmark that function.</li>
+<li>-benchmem tells it to include memory allocation stats in benchmark result.</li>
+<li>-benchtime= tells it the time for one benchmark to run. By default it is 1 second. You can specify here.</li>
+<li>-count= tells it the number of times the benchmark needs to be run. The profilers are not determinstic in nature hence its nice to have good sampling and then compare it.</li>
+<li>-cpuprofile= and -memprofile= indicates the files we want to generate for our profiling to save.</li>
+</ol>
+<p>Now i typically save the out by <code>&gt; benchmark.&lt;benchmark-name&gt;</code> so that i can use benchstat to compare it in future. Cool lets move further.</p>
+<p>This is the output of the benchmark.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>goos: darwin
+</span></span><span style="display:flex;"><span>goarch: arm64
+</span></span><span style="display:flex;"><span>pkg: cpu
+</span></span><span style="display:flex;"><span>cpu: Apple M4 Pro
+</span></span><span style="display:flex;"><span>BenchmarkCalculateResult-12    	       1	<span style="color:#ae81ff">3519798417</span> ns/op	<span style="color:#ae81ff">54486608696</span> B/op	  <span style="color:#ae81ff">356902</span> allocs/op
+</span></span><span style="display:flex;"><span>BenchmarkCalculateResult-12    	       1	<span style="color:#ae81ff">3329816625</span> ns/op	<span style="color:#ae81ff">54483367368</span> B/op	  <span style="color:#ae81ff">351092</span> allocs/op
+</span></span><span style="display:flex;"><span>BenchmarkCalculateResult-12    	       2	<span style="color:#ae81ff">2517153625</span> ns/op	<span style="color:#ae81ff">54464683360</span> B/op	  <span style="color:#ae81ff">329897</span> allocs/op
+</span></span><span style="display:flex;"><span>BenchmarkCalculateResult-12    	       2	<span style="color:#ae81ff">2544592792</span> ns/op	<span style="color:#ae81ff">54463985504</span> B/op	  <span style="color:#ae81ff">329037</span> allocs/op
+</span></span><span style="display:flex;"><span>BenchmarkCalculateResult-12    	       2	<span style="color:#ae81ff">2523259521</span> ns/op	<span style="color:#ae81ff">54463806728</span> B/op	  <span style="color:#ae81ff">328832</span> allocs/op
+</span></span><span style="display:flex;"><span>BenchmarkCalculateResult-12    	       2	<span style="color:#ae81ff">2553570208</span> ns/op	<span style="color:#ae81ff">54463119100</span> B/op	  <span style="color:#ae81ff">327607</span> allocs/op
+</span></span><span style="display:flex;"><span>BenchmarkCalculateResult-12    	       2	<span style="color:#ae81ff">2545432750</span> ns/op	<span style="color:#ae81ff">54464322420</span> B/op	  <span style="color:#ae81ff">329436</span> allocs/op
+</span></span><span style="display:flex;"><span>BenchmarkCalculateResult-12    	       2	<span style="color:#ae81ff">2546903666</span> ns/op	<span style="color:#ae81ff">54463173380</span> B/op	  <span style="color:#ae81ff">327862</span> allocs/op
+</span></span><span style="display:flex;"><span>BenchmarkCalculateResult-12    	       2	<span style="color:#ae81ff">2533780854</span> ns/op	<span style="color:#ae81ff">54464302596</span> B/op	  <span style="color:#ae81ff">330191</span> allocs/op
+</span></span><span style="display:flex;"><span>BenchmarkCalculateResult-12    	       2	<span style="color:#ae81ff">2533250021</span> ns/op	<span style="color:#ae81ff">54464358280</span> B/op	  <span style="color:#ae81ff">329840</span> allocs/op
+</span></span><span style="display:flex;"><span>PASS
+</span></span><span style="display:flex;"><span>ok  	cpu	48.456s
+</span></span></code></pre></div><p>Really bad stuff ngl. Lets see our cpu and mem profiling.
+<img src="./cpu/cpu_pprof.png" alt="Cpu">
+Its shows funcking 6 seconds on result and this is only 8% of program and i am like what. Lets go inside it.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-zsh" data-lang="zsh"><span style="display:flex;"><span>total: 76.73s
+</span></span><span style="display:flex;"><span>ROUTINE <span style="color:#f92672">========================</span> fmt.Sprintf in /nix/store/hj3rkkp4azj65qvalnbl6ax0sgrfgmgh-go-1.25.7/share/go/src/fmt/print.go
+</span></span><span style="display:flex;"><span>         <span style="color:#ae81ff">0</span>      170ms <span style="color:#f92672">(</span>flat, cum<span style="color:#f92672">)</span>  0.22% of Total
+</span></span><span style="display:flex;"><span>         .          .    237:func Sprintf<span style="color:#f92672">(</span>format string, a ...any<span style="color:#f92672">)</span> string <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>         .      130ms    238:	p :<span style="color:#f92672">=</span> newPrinter<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span>         .       20ms    239:	p.doPrintf<span style="color:#f92672">(</span>format, a<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>         .       10ms    240:	s :<span style="color:#f92672">=</span> string<span style="color:#f92672">(</span>p.buf<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>         .       10ms    241:	p.free<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span>         .          .    242:	<span style="color:#66d9ef">return</span> s
+</span></span><span style="display:flex;"><span>         .          .    243:<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>         .          .    244:
+</span></span><span style="display:flex;"><span>         .          .    245:// Appendf formats according to a format specifier, appends the result to the byte
+</span></span><span style="display:flex;"><span>         .          .    246:// slice, and returns the updated slice.
+</span></span></code></pre></div><p>Now what the duck is a newPrinter() ? Also i can see that 170ms out of 6 seconds tells me fmt.Sprintf is not the bottleneck, there is something fundamentally i am doing wrong. Lets see</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#f92672">(</span>pprof<span style="color:#f92672">)</span> list newPrinter
+</span></span><span style="display:flex;"><span>Total: 76.73s
+</span></span><span style="display:flex;"><span>ROUTINE <span style="color:#f92672">========================</span> fmt.newPrinter in /nix/store/hj3rkkp4azj65qvalnbl6ax0sgrfgmgh-go-1.25.7/share/go/src/fmt/print.go
+</span></span><span style="display:flex;"><span>         <span style="color:#ae81ff">0</span>      130ms <span style="color:#f92672">(</span>flat, cum<span style="color:#f92672">)</span>  0.17% of Total
+</span></span><span style="display:flex;"><span>         .          .    151:func newPrinter<span style="color:#f92672">()</span> *pp <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>         .      130ms    152:	p :<span style="color:#f92672">=</span> ppFree.Get<span style="color:#f92672">()</span>.<span style="color:#f92672">(</span>*pp<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>         .          .    153:	p.panicking <span style="color:#f92672">=</span> false
+</span></span><span style="display:flex;"><span>         .          .    154:	p.erroring <span style="color:#f92672">=</span> false
+</span></span><span style="display:flex;"><span>         .          .    155:	p.wrapErrs <span style="color:#f92672">=</span> false
+</span></span><span style="display:flex;"><span>         .          .    156:	p.fmt.init<span style="color:#f92672">(</span>&amp;p.buf<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>         .          .    157:	<span style="color:#66d9ef">return</span> p
+</span></span><span style="display:flex;"><span><span style="color:#f92672">(</span>pprof<span style="color:#f92672">)</span>
+</span></span></code></pre></div><p>So actually profiler can hint me enough that neither me function has issues. The issue is on the result line i am not able to understand.
+You know what nig, let me fucking open up the assembly view.
+Also let me also post memprofile.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>❯ go tool pprof mem.pprof
+</span></span><span style="display:flex;"><span>File: cpu.test
+</span></span><span style="display:flex;"><span>Type: alloc_space
+</span></span><span style="display:flex;"><span>Time: 2026-03-22 14:20:33 IST
+</span></span><span style="display:flex;"><span>Entering interactive mode <span style="color:#f92672">(</span>type <span style="color:#e6db74">&#34;help&#34;</span> <span style="color:#66d9ef">for</span> commands, <span style="color:#e6db74">&#34;o&#34;</span> <span style="color:#66d9ef">for</span> options<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">(</span>pprof<span style="color:#f92672">)</span> list calculateResult
+</span></span><span style="display:flex;"><span>Total: 912.98GB
+</span></span><span style="display:flex;"><span>ROUTINE <span style="color:#f92672">========================</span> cpu.calculateResult in /Users/briheet/code/go_talk/cpu/helper.go
+</span></span><span style="display:flex;"><span>  912.70GB   912.97GB <span style="color:#f92672">(</span>flat, cum<span style="color:#f92672">)</span>   100% of Total
+</span></span><span style="display:flex;"><span>         .          .      7:func calculateResult<span style="color:#f92672">(</span>num int<span style="color:#f92672">)</span> string <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>         .          .      8:
+</span></span><span style="display:flex;"><span>         .          .      9:	var result string
+</span></span><span style="display:flex;"><span>         .          .     10:	<span style="color:#66d9ef">for</span> i :<span style="color:#f92672">=</span> range num <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>  912.70GB   912.97GB     11:		result <span style="color:#f92672">+=</span> fmt.Sprintf<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;item-%d,&#34;</span>, i<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>         .          .     12:	<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>         .          .     13:
+</span></span><span style="display:flex;"><span>         .          .     14:	<span style="color:#66d9ef">return</span> result
+</span></span><span style="display:flex;"><span>         .          .     15:<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">(</span>pprof<span style="color:#f92672">)</span> list Sprintf
+</span></span><span style="display:flex;"><span>Total: 912.98GB
+</span></span><span style="display:flex;"><span>ROUTINE <span style="color:#f92672">========================</span> fmt.Sprintf in /nix/store/hj3rkkp4azj65qvalnbl6ax0sgrfgmgh-go-1.25.7/share/go/src/fmt/print.go
+</span></span><span style="display:flex;"><span>   27.50MB   284.91MB <span style="color:#f92672">(</span>flat, cum<span style="color:#f92672">)</span>  0.03% of Total
+</span></span><span style="display:flex;"><span>         .          .    237:func Sprintf<span style="color:#f92672">(</span>format string, a ...any<span style="color:#f92672">)</span> string <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>         .   256.91MB    238:	p :<span style="color:#f92672">=</span> newPrinter<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span>         .   512.01kB    239:	p.doPrintf<span style="color:#f92672">(</span>format, a<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>   27.50MB    27.50MB    240:	s :<span style="color:#f92672">=</span> string<span style="color:#f92672">(</span>p.buf<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>         .          .    241:	p.free<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span>         .          .    242:	<span style="color:#66d9ef">return</span> s
+</span></span><span style="display:flex;"><span>         .          .    243:<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>         .          .    244:
+</span></span><span style="display:flex;"><span>         .          .    245:// Appendf formats according to a format specifier, appends the result to the byte
+</span></span></code></pre></div><p>Woh thats a lot of allocation. The issue is on the line but i cant think of anything better. Lets see in assembly.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>go build -gcflags<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;-m=2&#39;</span> -o asmcheck .
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># AS our function got inlined in main, we check main. You can also add //go:noinline this will make the function we are benchmarking not inline</span>
+</span></span><span style="display:flex;"><span>~/go/bin/lensm -filter <span style="color:#e6db74">&#39;main.main&#39;</span> asmcheck
+</span></span></code></pre></div><p>Now we see the real issue, We are doing 2 runtime calls. But how ? First one is doing boxing interface as we saw in above basic flow section.
+Second is we are doing string concatenation which happens as runtime.</p>
+<ol>
+<li>CALL runtime.convT64(SB) — boxing i into interface{} for fmt.Sprintf&rsquo;s &hellip;any parameter.</li>
+<li>CALL runtime.concatstring2(SB) — the result +=</li>
+</ol>
+<p>So now we can hold of that concatenation does is that it picks up the previous string, and add the new string to it. If you read its code concatString, it takes in a temporary buffer,
+and a slice of the 2 strings we have sents and concats them whatever.</p>
+<p>Hence now we have to find a better way to concat strings and remove this stuff. Lets google
+<img src="./cpu/google_result.png" alt="Google"></p>
+<p>Hence google says to use strings.Builder. Let me try and see.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#f92672">package</span> <span style="color:#a6e22e">main</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> (
+</span></span><span style="display:flex;"><span>	<span style="color:#e6db74">&#34;fmt&#34;</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#e6db74">&#34;strings&#34;</span>
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">calculateResult</span>(<span style="color:#a6e22e">num</span> <span style="color:#66d9ef">int</span>) <span style="color:#66d9ef">string</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">sb</span> <span style="color:#a6e22e">strings</span>.<span style="color:#a6e22e">Builder</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">for</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">num</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">sb</span>.<span style="color:#a6e22e">WriteString</span>(<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Sprintf</span>(<span style="color:#e6db74">&#34;item-%d,&#34;</span>, <span style="color:#a6e22e">i</span>))
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">sb</span>.<span style="color:#a6e22e">String</span>()
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>❯ go run .
+</span></span><span style="display:flex;"><span>elapsed: 11.362125ms
+</span></span><span style="display:flex;"><span>length: <span style="color:#ae81ff">100101</span>
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>	 go test -v ./...
+</span></span><span style="display:flex;"><span><span style="color:#f92672">===</span> RUN   TestCalculateResult
+</span></span><span style="display:flex;"><span><span style="color:#f92672">===</span> RUN   TestCalculateResult/basic_test
+</span></span><span style="display:flex;"><span>--- PASS: TestCalculateResult <span style="color:#f92672">(</span>0.00s<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>    --- PASS: TestCalculateResult/basic_test <span style="color:#f92672">(</span>0.00s<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>PASS
+</span></span><span style="display:flex;"><span>ok  	cpu	1.157s
+</span></span><span style="display:flex;"><span>❯ go test -bench<span style="color:#f92672">=</span>. -benchmem -benchtime<span style="color:#f92672">=</span>3s -count<span style="color:#f92672">=</span><span style="color:#ae81ff">10</span> -cpuprofile<span style="color:#f92672">=</span>cpu.pprof -memprofile<span style="color:#f92672">=</span>mem.pprof &gt; benchmark1.txt
+</span></span><span style="display:flex;"><span>❯ hx benchmark1.txt
+</span></span><span style="display:flex;"><span>❯ benchstat benchmark.txt benchmark1.txt
+</span></span><span style="display:flex;"><span>goos: darwin
+</span></span><span style="display:flex;"><span>goarch: arm64
+</span></span><span style="display:flex;"><span>pkg: cpu
+</span></span><span style="display:flex;"><span>cpu: Apple M4 Pro
+</span></span><span style="display:flex;"><span>                   │  benchmark.txt  │           benchmark1.txt            │
+</span></span><span style="display:flex;"><span>                   │     sec/op      │   sec/op     vs base                │
+</span></span><span style="display:flex;"><span>CalculateResult-12   2545.013m ± 31%   4.488m ± 2%  -99.82% <span style="color:#f92672">(</span>p<span style="color:#f92672">=</span>0.000 n<span style="color:#f92672">=</span>10<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>                   │  benchmark.txt   │            benchmark1.txt            │
+</span></span><span style="display:flex;"><span>                   │       B/op       │     B/op      vs base                │
+</span></span><span style="display:flex;"><span>CalculateResult-12   51941.216Mi ± 0%   7.293Mi ± 0%  -99.99% <span style="color:#f92672">(</span>p<span style="color:#f92672">=</span>0.000 n<span style="color:#f92672">=</span>10<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>                   │ benchmark.txt │           benchmark1.txt            │
+</span></span><span style="display:flex;"><span>                   │   allocs/op   │  allocs/op   vs base                │
+</span></span><span style="display:flex;"><span>CalculateResult-12     329.6k ± 7%   200.0k ± 0%  -39.33% <span style="color:#f92672">(</span>p<span style="color:#f92672">=</span>0.000 n<span style="color:#f92672">=</span>10<span style="color:#f92672">)</span>
+</span></span></code></pre></div><p>We can see that strings.Builder eliminated the O(n²) copy-on-every-append, cutting time from 2.5s to 4.5ms and memory from 52GB to 7MB. Now lets us check profiling.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span> go tool pprof mem.pprof
+</span></span><span style="display:flex;"><span>File: cpu.test
+</span></span><span style="display:flex;"><span>Type: alloc_space
+</span></span><span style="display:flex;"><span>Time: 2026-03-22 15:03:19 IST
+</span></span><span style="display:flex;"><span>Entering interactive mode <span style="color:#f92672">(</span>type <span style="color:#e6db74">&#34;help&#34;</span> <span style="color:#66d9ef">for</span> commands, <span style="color:#e6db74">&#34;o&#34;</span> <span style="color:#66d9ef">for</span> options<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">(</span>pprof<span style="color:#f92672">)</span> list calculateResult
+</span></span><span style="display:flex;"><span>Total: 56.79GB
+</span></span><span style="display:flex;"><span>ROUTINE <span style="color:#f92672">========================</span> cpu.calculateResult in /Users/briheet/code/go_talk/cpu/helper.go
+</span></span><span style="display:flex;"><span>    5.94GB    56.79GB <span style="color:#f92672">(</span>flat, cum<span style="color:#f92672">)</span>   100% of Total
+</span></span><span style="display:flex;"><span>         .          .      8:func calculateResult<span style="color:#f92672">(</span>num int<span style="color:#f92672">)</span> string <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>         .          .      9:
+</span></span><span style="display:flex;"><span>         .          .     10:	var sb strings.Builder
+</span></span><span style="display:flex;"><span>         .          .     11:	<span style="color:#66d9ef">for</span> i :<span style="color:#f92672">=</span> range num <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>    5.94GB    56.79GB     12:		sb.WriteString<span style="color:#f92672">(</span>fmt.Sprintf<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;item-%d,&#34;</span>, i<span style="color:#f92672">))</span>
+</span></span><span style="display:flex;"><span>         .          .     13:	<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>         .          .     14:
+</span></span><span style="display:flex;"><span>         .          .     15:	<span style="color:#66d9ef">return</span> sb.String<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span>         .          .     16:<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">(</span>pprof<span style="color:#f92672">)</span> exit
+</span></span><span style="display:flex;"><span>❯ go tool pprof cpu.pprof
+</span></span><span style="display:flex;"><span>File: cpu.test
+</span></span><span style="display:flex;"><span>Type: cpu
+</span></span><span style="display:flex;"><span>Time: 2026-03-22 15:02:43 IST
+</span></span><span style="display:flex;"><span>Duration: 35.99s, Total samples <span style="color:#f92672">=</span> 38.87s <span style="color:#f92672">(</span>108.01%<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>Entering interactive mode <span style="color:#f92672">(</span>type <span style="color:#e6db74">&#34;help&#34;</span> <span style="color:#66d9ef">for</span> commands, <span style="color:#e6db74">&#34;o&#34;</span> <span style="color:#66d9ef">for</span> options<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">(</span>pprof<span style="color:#f92672">)</span> list calculateResult
+</span></span><span style="display:flex;"><span>Total: 38.87s
+</span></span><span style="display:flex;"><span>ROUTINE <span style="color:#f92672">========================</span> cpu.calculateResult in /Users/briheet/code/go_talk/cpu/helper.go
+</span></span><span style="display:flex;"><span>      20ms      2.32s <span style="color:#f92672">(</span>flat, cum<span style="color:#f92672">)</span>  5.97% of Total
+</span></span><span style="display:flex;"><span>         .          .      8:func calculateResult<span style="color:#f92672">(</span>num int<span style="color:#f92672">)</span> string <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>         .          .      9:
+</span></span><span style="display:flex;"><span>         .          .     10:	var sb strings.Builder
+</span></span><span style="display:flex;"><span>         .          .     11:	<span style="color:#66d9ef">for</span> i :<span style="color:#f92672">=</span> range num <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>      20ms      2.32s     12:		sb.WriteString<span style="color:#f92672">(</span>fmt.Sprintf<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;item-%d,&#34;</span>, i<span style="color:#f92672">))</span>
+</span></span><span style="display:flex;"><span>         .          .     13:	<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>         .          .     14:
+</span></span><span style="display:flex;"><span>         .          .     15:	<span style="color:#66d9ef">return</span> sb.String<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span>         .          .     16:<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">(</span>pprof<span style="color:#f92672">)</span>
+</span></span></code></pre></div><p>Holy moly this is crazy. Pretty nice reduction as compared to above.</p>
+<p>Cool, then let me get into my zone. I like only micro/nano stuff with zero allocs.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>❯ go test -bench<span style="color:#f92672">=</span>. -benchmem -benchtime<span style="color:#f92672">=</span>3s -count<span style="color:#f92672">=</span><span style="color:#ae81ff">10</span> -cpuprofile<span style="color:#f92672">=</span>cpu.pprof -memprofile<span style="color:#f92672">=</span>mem.pprof &gt; benchmark2.txt
+</span></span><span style="display:flex;"><span>❯ benchstat benchmark1.txt benchmark2.txt
+</span></span><span style="display:flex;"><span>goos: darwin
+</span></span><span style="display:flex;"><span>goarch: arm64
+</span></span><span style="display:flex;"><span>pkg: cpu
+</span></span><span style="display:flex;"><span>cpu: Apple M4 Pro
+</span></span><span style="display:flex;"><span>                   │ benchmark1.txt │           benchmark2.txt            │
+</span></span><span style="display:flex;"><span>                   │     sec/op     │   sec/op     vs base                │
+</span></span><span style="display:flex;"><span>CalculateResult-12      4.488m ± 2%   1.632m ± 3%  -63.64% <span style="color:#f92672">(</span>p<span style="color:#f92672">=</span>0.000 n<span style="color:#f92672">=</span>10<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>                   │ benchmark1.txt │            benchmark2.txt            │
+</span></span><span style="display:flex;"><span>                   │      B/op      │     B/op      vs base                │
+</span></span><span style="display:flex;"><span>CalculateResult-12     7.293Mi ± 0%   5.494Mi ± 0%  -24.66% <span style="color:#f92672">(</span>p<span style="color:#f92672">=</span>0.000 n<span style="color:#f92672">=</span>10<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>                   │ benchmark1.txt │           benchmark2.txt            │
+</span></span><span style="display:flex;"><span>                   │   allocs/op    │  allocs/op   vs base                │
+</span></span><span style="display:flex;"><span>CalculateResult-12      200.0k ± 0%   100.0k ± 0%  -49.98% <span style="color:#f92672">(</span>p<span style="color:#f92672">=</span>0.000 n<span style="color:#f92672">=</span>10<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>❯ go tool pprof cpu.pprof
+</span></span><span style="display:flex;"><span>File: cpu.test
+</span></span><span style="display:flex;"><span>Type: cpu
+</span></span><span style="display:flex;"><span>Time: 2026-03-22 15:23:12 IST
+</span></span><span style="display:flex;"><span>Duration: 35.90s, Total samples <span style="color:#f92672">=</span> 41.71s <span style="color:#f92672">(</span>116.20%<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>Entering interactive mode <span style="color:#f92672">(</span>type <span style="color:#e6db74">&#34;help&#34;</span> <span style="color:#66d9ef">for</span> commands, <span style="color:#e6db74">&#34;o&#34;</span> <span style="color:#66d9ef">for</span> options<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">(</span>pprof<span style="color:#f92672">)</span> list calculateResult
+</span></span><span style="display:flex;"><span>Total: 41.71s
+</span></span><span style="display:flex;"><span>ROUTINE <span style="color:#f92672">========================</span> cpu.calculateResult in /Users/briheet/code/go_talk/cpu/helper.go
+</span></span><span style="display:flex;"><span>         <span style="color:#ae81ff">0</span>      1.51s <span style="color:#f92672">(</span>flat, cum<span style="color:#f92672">)</span>  3.62% of Total
+</span></span><span style="display:flex;"><span>         .          .     10:func calculateResult<span style="color:#f92672">(</span>num int<span style="color:#f92672">)</span> string <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>         .          .     11:
+</span></span><span style="display:flex;"><span>         .          .     12:	var sb strings.Builder
+</span></span><span style="display:flex;"><span>         .          .     13:	<span style="color:#66d9ef">for</span> i :<span style="color:#f92672">=</span> range num <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>         .      260ms     14:		sb.Write<span style="color:#f92672">(</span>itemBytes<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>         .      1.13s     15:		sb.WriteString<span style="color:#f92672">(</span>strconv.Itoa<span style="color:#f92672">(</span>i<span style="color:#f92672">))</span>
+</span></span><span style="display:flex;"><span>         .      120ms     16:		sb.WriteByte<span style="color:#f92672">(</span><span style="color:#e6db74">&#39;,&#39;</span><span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>         .          .     17:	<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>         .          .     18:
+</span></span><span style="display:flex;"><span>         .          .     19:	<span style="color:#66d9ef">return</span> sb.String<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span>         .          .     20:<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">(</span>pprof<span style="color:#f92672">)</span> exit
+</span></span><span style="display:flex;"><span>❯ go tool pprof mem.pprof
+</span></span><span style="display:flex;"><span>File: cpu.test
+</span></span><span style="display:flex;"><span>Type: alloc_space
+</span></span><span style="display:flex;"><span>Time: 2026-03-22 15:23:48 IST
+</span></span><span style="display:flex;"><span>Entering interactive mode <span style="color:#f92672">(</span>type <span style="color:#e6db74">&#34;help&#34;</span> <span style="color:#66d9ef">for</span> commands, <span style="color:#e6db74">&#34;o&#34;</span> <span style="color:#66d9ef">for</span> options<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">(</span>pprof<span style="color:#f92672">)</span> list calculateResult
+</span></span><span style="display:flex;"><span>Total: 116.77GB
+</span></span><span style="display:flex;"><span>ROUTINE <span style="color:#f92672">========================</span> cpu.calculateResult in /Users/briheet/code/go_talk/cpu/helper.go
+</span></span><span style="display:flex;"><span>         <span style="color:#ae81ff">0</span>   116.76GB <span style="color:#f92672">(</span>flat, cum<span style="color:#f92672">)</span>   100% of Total
+</span></span><span style="display:flex;"><span>         .          .     10:func calculateResult<span style="color:#f92672">(</span>num int<span style="color:#f92672">)</span> string <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>         .          .     11:
+</span></span><span style="display:flex;"><span>         .          .     12:	var sb strings.Builder
+</span></span><span style="display:flex;"><span>         .          .     13:	<span style="color:#66d9ef">for</span> i :<span style="color:#f92672">=</span> range num <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>         .    32.56GB     14:		sb.Write<span style="color:#f92672">(</span>itemBytes<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>         .    84.21GB     15:		sb.WriteString<span style="color:#f92672">(</span>strconv.Itoa<span style="color:#f92672">(</span>i<span style="color:#f92672">))</span>
+</span></span><span style="display:flex;"><span>         .          .     16:		sb.WriteByte<span style="color:#f92672">(</span><span style="color:#e6db74">&#39;,&#39;</span><span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>         .          .     17:	<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>         .          .     18:
+</span></span><span style="display:flex;"><span>         .          .     19:	<span style="color:#66d9ef">return</span> sb.String<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span>         .          .     20:<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">(</span>pprof<span style="color:#f92672">)</span>
+</span></span></code></pre></div><p>This is even better than our first stuff. Essentailly, strings.Buidler has some methods for bytes and we already have some string as static in nature hence preallocate it and
+use it.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#f92672">package</span> <span style="color:#a6e22e">main</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> (
+</span></span><span style="display:flex;"><span>	<span style="color:#e6db74">&#34;strconv&#34;</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#e6db74">&#34;strings&#34;</span>
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">itemBytes</span> = []<span style="color:#66d9ef">byte</span>{<span style="color:#ae81ff">0x69</span>, <span style="color:#ae81ff">0x74</span>, <span style="color:#ae81ff">0x65</span>, <span style="color:#ae81ff">0x6d</span>, <span style="color:#ae81ff">0x2d</span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">calculateResult</span>(<span style="color:#a6e22e">num</span> <span style="color:#66d9ef">int</span>) <span style="color:#66d9ef">string</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">sb</span> <span style="color:#a6e22e">strings</span>.<span style="color:#a6e22e">Builder</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">for</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">num</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">sb</span>.<span style="color:#a6e22e">Write</span>(<span style="color:#a6e22e">itemBytes</span>)
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">sb</span>.<span style="color:#a6e22e">WriteString</span>(<span style="color:#a6e22e">strconv</span>.<span style="color:#a6e22e">Itoa</span>(<span style="color:#a6e22e">i</span>))
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">sb</span>.<span style="color:#a6e22e">WriteByte</span>(<span style="color:#e6db74">&#39;,&#39;</span>)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">sb</span>.<span style="color:#a6e22e">String</span>()
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>We can also do better. Lets see how</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>❯ go test -bench<span style="color:#f92672">=</span>. -benchmem -benchtime<span style="color:#f92672">=</span>3s -count<span style="color:#f92672">=</span><span style="color:#ae81ff">10</span> -cpuprofile<span style="color:#f92672">=</span>cpu.pprof -memprofile<span style="color:#f92672">=</span>mem.pprof &gt; benchmark3.txt
+</span></span><span style="display:flex;"><span>❯ go test -v ./...
+</span></span><span style="display:flex;"><span><span style="color:#f92672">===</span> RUN   TestCalculateResult
+</span></span><span style="display:flex;"><span><span style="color:#f92672">===</span> RUN   TestCalculateResult/basic_test
+</span></span><span style="display:flex;"><span>--- PASS: TestCalculateResult <span style="color:#f92672">(</span>0.00s<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>    --- PASS: TestCalculateResult/basic_test <span style="color:#f92672">(</span>0.00s<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>PASS
+</span></span><span style="display:flex;"><span>ok  	cpu	<span style="color:#f92672">(</span>cached<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>❯ benchstat benchmark2.txt benchmark3.txt
+</span></span><span style="display:flex;"><span>goos: darwin
+</span></span><span style="display:flex;"><span>goarch: arm64
+</span></span><span style="display:flex;"><span>pkg: cpu
+</span></span><span style="display:flex;"><span>cpu: Apple M4 Pro
+</span></span><span style="display:flex;"><span>                   │ benchmark2.txt │           benchmark3.txt            │
+</span></span><span style="display:flex;"><span>                   │     sec/op     │   sec/op     vs base                │
+</span></span><span style="display:flex;"><span>CalculateResult-12     1631.9µ ± 3%   827.2µ ± 1%  -49.31% <span style="color:#f92672">(</span>p<span style="color:#f92672">=</span>0.000 n<span style="color:#f92672">=</span>10<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>                   │ benchmark2.txt │            benchmark3.txt            │
+</span></span><span style="display:flex;"><span>                   │      B/op      │     B/op      vs base                │
+</span></span><span style="display:flex;"><span>CalculateResult-12     5.494Mi ± 0%   1.048Mi ± 0%  -80.93% <span style="color:#f92672">(</span>p<span style="color:#f92672">=</span>0.000 n<span style="color:#f92672">=</span>10<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>                   │ benchmark2.txt  │           benchmark3.txt            │
+</span></span><span style="display:flex;"><span>                   │    allocs/op    │ allocs/op   vs base                 │
+</span></span><span style="display:flex;"><span>CalculateResult-12   100033.000 ± 0%   1.000 ± 0%  -100.00% <span style="color:#f92672">(</span>p<span style="color:#f92672">=</span>0.000 n<span style="color:#f92672">=</span>10<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>❯ go tool pprof cpu.pprof
+</span></span><span style="display:flex;"><span>File: cpu.test
+</span></span><span style="display:flex;"><span>Type: cpu
+</span></span><span style="display:flex;"><span>Time: 2026-03-22 16:23:04 IST
+</span></span><span style="display:flex;"><span>Duration: 36.07s, Total samples <span style="color:#f92672">=</span> 35.37s <span style="color:#f92672">(</span>98.07%<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>Entering interactive mode <span style="color:#f92672">(</span>type <span style="color:#e6db74">&#34;help&#34;</span> <span style="color:#66d9ef">for</span> commands, <span style="color:#e6db74">&#34;o&#34;</span> <span style="color:#66d9ef">for</span> options<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">(</span>pprof<span style="color:#f92672">)</span> list calculateResult
+</span></span><span style="display:flex;"><span>Total: 35.37s
+</span></span><span style="display:flex;"><span>ROUTINE <span style="color:#f92672">========================</span> cpu.calculateResult in /Users/briheet/code/go_talk/cpu/helper.go
+</span></span><span style="display:flex;"><span>     440ms      2.91s <span style="color:#f92672">(</span>flat, cum<span style="color:#f92672">)</span>  8.23% of Total
+</span></span><span style="display:flex;"><span>         .          .     20:func calculateResult<span style="color:#f92672">(</span>num int<span style="color:#f92672">)</span> string <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>         .          .     21:
+</span></span><span style="display:flex;"><span>         .          .     22:	bp :<span style="color:#f92672">=</span> bufPool.Get<span style="color:#f92672">()</span>.<span style="color:#f92672">(</span>*<span style="color:#f92672">[]</span>byte<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>         .          .     23:	buf :<span style="color:#f92672">=</span> <span style="color:#f92672">(</span>*bp<span style="color:#f92672">)[</span>:0<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>         .          .     24:
+</span></span><span style="display:flex;"><span>         .          .     25:	var intBuf <span style="color:#f92672">[</span>20<span style="color:#f92672">]</span>byte
+</span></span><span style="display:flex;"><span>      40ms       40ms     26:	<span style="color:#66d9ef">for</span> i :<span style="color:#f92672">=</span> range num <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>     180ms      350ms     27:		buf <span style="color:#f92672">=</span> append<span style="color:#f92672">(</span>buf, itemBytes...<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>      10ms      1.95s     28:		b :<span style="color:#f92672">=</span> strconv.AppendInt<span style="color:#f92672">(</span>intBuf<span style="color:#f92672">[</span>:0<span style="color:#f92672">]</span>, int64<span style="color:#f92672">(</span>i<span style="color:#f92672">)</span>, 10<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>      40ms      330ms     29:		buf <span style="color:#f92672">=</span> append<span style="color:#f92672">(</span>buf, b...<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>     170ms      170ms     30:		buf <span style="color:#f92672">=</span> append<span style="color:#f92672">(</span>buf, commaByte<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>         .          .     31:	<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>         .          .     32:
+</span></span><span style="display:flex;"><span>         .       70ms     33:	result :<span style="color:#f92672">=</span> string<span style="color:#f92672">(</span>buf<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>         .          .     34:	*bp <span style="color:#f92672">=</span> buf
+</span></span><span style="display:flex;"><span>         .          .     35:	bufPool.Put<span style="color:#f92672">(</span>bp<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>         .          .     36:	<span style="color:#66d9ef">return</span> result
+</span></span><span style="display:flex;"><span>         .          .     37:<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">(</span>pprof<span style="color:#f92672">)</span> exit
+</span></span><span style="display:flex;"><span>❯ go tool pprof mem.pprof
+</span></span><span style="display:flex;"><span>File: cpu.test
+</span></span><span style="display:flex;"><span>Type: alloc_space
+</span></span><span style="display:flex;"><span>Time: 2026-03-22 16:23:40 IST
+</span></span><span style="display:flex;"><span>Entering interactive mode <span style="color:#f92672">(</span>type <span style="color:#e6db74">&#34;help&#34;</span> <span style="color:#66d9ef">for</span> commands, <span style="color:#e6db74">&#34;o&#34;</span> <span style="color:#66d9ef">for</span> options<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">(</span>pprof<span style="color:#f92672">)</span> list calculateResult
+</span></span><span style="display:flex;"><span>Total: 44.29GB
+</span></span><span style="display:flex;"><span>ROUTINE <span style="color:#f92672">========================</span> cpu.calculateResult in /Users/briheet/code/go_talk/cpu/helper.go
+</span></span><span style="display:flex;"><span>   44.24GB    44.29GB <span style="color:#f92672">(</span>flat, cum<span style="color:#f92672">)</span>   100% of Total
+</span></span><span style="display:flex;"><span>         .          .     20:func calculateResult<span style="color:#f92672">(</span>num int<span style="color:#f92672">)</span> string <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>         .          .     21:
+</span></span><span style="display:flex;"><span>         .    26.99MB     22:	bp :<span style="color:#f92672">=</span> bufPool.Get<span style="color:#f92672">()</span>.<span style="color:#f92672">(</span>*<span style="color:#f92672">[]</span>byte<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>         .          .     23:	buf :<span style="color:#f92672">=</span> <span style="color:#f92672">(</span>*bp<span style="color:#f92672">)[</span>:0<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>         .          .     24:
+</span></span><span style="display:flex;"><span>         .          .     25:	var intBuf <span style="color:#f92672">[</span>20<span style="color:#f92672">]</span>byte
+</span></span><span style="display:flex;"><span>         .          .     26:	<span style="color:#66d9ef">for</span> i :<span style="color:#f92672">=</span> range num <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>         .          .     27:		buf <span style="color:#f92672">=</span> append<span style="color:#f92672">(</span>buf, itemBytes...<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>         .          .     28:		b :<span style="color:#f92672">=</span> strconv.AppendInt<span style="color:#f92672">(</span>intBuf<span style="color:#f92672">[</span>:0<span style="color:#f92672">]</span>, int64<span style="color:#f92672">(</span>i<span style="color:#f92672">)</span>, 10<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>         .          .     29:		buf <span style="color:#f92672">=</span> append<span style="color:#f92672">(</span>buf, b...<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>         .          .     30:		buf <span style="color:#f92672">=</span> append<span style="color:#f92672">(</span>buf, commaByte<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>         .          .     31:	<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>         .          .     32:
+</span></span><span style="display:flex;"><span>   44.24GB    44.24GB     33:	result :<span style="color:#f92672">=</span> string<span style="color:#f92672">(</span>buf<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>         .          .     34:	*bp <span style="color:#f92672">=</span> buf
+</span></span><span style="display:flex;"><span>         .    24.54MB     35:	bufPool.Put<span style="color:#f92672">(</span>bp<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>         .          .     36:	<span style="color:#66d9ef">return</span> result
+</span></span><span style="display:flex;"><span>         .          .     37:<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">(</span>pprof<span style="color:#f92672">)</span>
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#f92672">package</span> <span style="color:#a6e22e">main</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> (
+</span></span><span style="display:flex;"><span>	<span style="color:#e6db74">&#34;strconv&#34;</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#e6db74">&#34;sync&#34;</span>
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">var</span> (
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">itemBytes</span> = []<span style="color:#66d9ef">byte</span>{<span style="color:#ae81ff">0x69</span>, <span style="color:#ae81ff">0x74</span>, <span style="color:#ae81ff">0x65</span>, <span style="color:#ae81ff">0x6d</span>, <span style="color:#ae81ff">0x2d</span>}
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">commaByte</span> = byte(<span style="color:#ae81ff">0x2c</span>)
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">bufPool</span> = <span style="color:#a6e22e">sync</span>.<span style="color:#a6e22e">Pool</span>{
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">New</span>: <span style="color:#66d9ef">func</span>() <span style="color:#66d9ef">any</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">b</span> <span style="color:#f92672">:=</span> make([]<span style="color:#66d9ef">byte</span>, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">2</span><span style="color:#f92672">*</span><span style="color:#ae81ff">1024</span><span style="color:#f92672">*</span><span style="color:#ae81ff">1024</span>)
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">b</span>
+</span></span><span style="display:flex;"><span>	},
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">calculateResult</span>(<span style="color:#a6e22e">num</span> <span style="color:#66d9ef">int</span>) <span style="color:#66d9ef">string</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">bp</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">bufPool</span>.<span style="color:#a6e22e">Get</span>().(<span style="color:#f92672">*</span>[]<span style="color:#66d9ef">byte</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">buf</span> <span style="color:#f92672">:=</span> (<span style="color:#f92672">*</span><span style="color:#a6e22e">bp</span>)[:<span style="color:#ae81ff">0</span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">intBuf</span> [<span style="color:#ae81ff">20</span>]<span style="color:#66d9ef">byte</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">for</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">num</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">buf</span> = append(<span style="color:#a6e22e">buf</span>, <span style="color:#a6e22e">itemBytes</span><span style="color:#f92672">...</span>)
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">b</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">strconv</span>.<span style="color:#a6e22e">AppendInt</span>(<span style="color:#a6e22e">intBuf</span>[:<span style="color:#ae81ff">0</span>], int64(<span style="color:#a6e22e">i</span>), <span style="color:#ae81ff">10</span>)
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">buf</span> = append(<span style="color:#a6e22e">buf</span>, <span style="color:#a6e22e">b</span><span style="color:#f92672">...</span>)
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">buf</span> = append(<span style="color:#a6e22e">buf</span>, <span style="color:#a6e22e">commaByte</span>)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">result</span> <span style="color:#f92672">:=</span> string(<span style="color:#a6e22e">buf</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#f92672">*</span><span style="color:#a6e22e">bp</span> = <span style="color:#a6e22e">buf</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">bufPool</span>.<span style="color:#a6e22e">Put</span>(<span style="color:#a6e22e">bp</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">result</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>What the helly, how can you i do this. So essentailly we can use a bufferPool, get the buf, use it to dump items, ints, use unsafe for string and return the buf. I would say
+this is not a hot path hence this is a bit overkill but <code>performance nerds looks for performance everwhere ;)</code></p>
+<p>TODO: Please add simd stuff here.</p>
+<p>So now lets compare with our baseline benchmarks how much we went better.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>❯ benchstat benchmark.txt benchmark3.txt
+</span></span><span style="display:flex;"><span>goos: darwin
+</span></span><span style="display:flex;"><span>goarch: arm64
+</span></span><span style="display:flex;"><span>pkg: cpu
+</span></span><span style="display:flex;"><span>cpu: Apple M4 Pro
+</span></span><span style="display:flex;"><span>                   │  benchmark.txt   │           benchmark3.txt            │
+</span></span><span style="display:flex;"><span>                   │      sec/op      │   sec/op     vs base                │
+</span></span><span style="display:flex;"><span>CalculateResult-12   2545012.8µ ± 31%   827.2µ ± 1%  -99.97% <span style="color:#f92672">(</span>p<span style="color:#f92672">=</span>0.000 n<span style="color:#f92672">=</span>10<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>                   │   benchmark.txt    │            benchmark3.txt             │
+</span></span><span style="display:flex;"><span>                   │        B/op        │     B/op      vs base                 │
+</span></span><span style="display:flex;"><span>CalculateResult-12   54464312508.0 ± 0%   1.048Mi ± 0%  -100.00% <span style="color:#f92672">(</span>p<span style="color:#f92672">=</span>0.000 n<span style="color:#f92672">=</span>10<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>                   │  benchmark.txt  │           benchmark3.txt            │
+</span></span><span style="display:flex;"><span>                   │    allocs/op    │ allocs/op   vs base                 │
+</span></span><span style="display:flex;"><span>CalculateResult-12   329638.000 ± 7%   1.000 ± 0%  -100.00% <span style="color:#f92672">(</span>p<span style="color:#f92672">=</span>0.000 n<span style="color:#f92672">=</span>10<span style="color:#f92672">)</span>
+</span></span></code></pre></div><p>So lets summarise how much better we went:</p>
+<ol>
+<li>Time: 2,545ms -&gt; 0.83ms (3,077x faster)</li>
+<li>Memory: 50.7 GB/op -&gt; 1 MB/op (the single safe string copy)</li>
+<li>Allocs: 329,600 -&gt; 1 (for concurrent safe code. crazy)</li>
+</ol>
+<p>Pretty solid Sunday i guess. I hope my boss doesn&rsquo;t removes me from job :sob. If this was C++, i would&rsquo;ve fucked the whole problem to so nanoseconds but ig i am happy till this in go.</p>
+<p>So yea, This is a way in which we can improve our cpu and memory stuff. Also working since a year at firms dealing in low latency, this is a ideal scenario. Also you do get paid a good amount
+to optimise stuff. So yea this was a whole section on Cpu and mem profiling, benchmarking, flags, benchstat, using assembly, etc.</p>
+<h2 id="compiler-directives">Compiler directives</h2>
+<h2 id="tracing-and-runtime-internals">Tracing and runtime internals</h2>
+
+    <a href="/"> >> Home</a>
+  </main>
+</div>
+    <footer>
+      
+      
+      <script>
+      (function() {
+        function center_el(tagName) {
+          var tags = document.getElementsByTagName(tagName), i, tag;
+          for (i = 0; i < tags.length; i++) {
+            tag = tags[i];
+            var parent = tag.parentElement;
+            
+            if (parent.childNodes.length === 1) {
+              
+              if (parent.nodeName === 'A') {
+                parent = parent.parentElement;
+                if (parent.childNodes.length != 1) continue;
+              }
+              if (parent.nodeName === 'P') parent.style.textAlign = 'center';
+            }
+          }
+        }
+        var tagNames = ['img', 'embed', 'object'];
+        for (var i = 0; i < tagNames.length; i++) {
+          center_el(tagNames[i]);
+        }
+      })();
+      </script>
+
+      
+      <hr/>
+      <a target="_blank" rel="noopener noreferrer" href="https://github.com/briheet">Github</a> | <a target="_blank" rel="noopener noreferrer" href="https://x.com/brsy_10">X</a> | <a target="_blank" rel="noopener noreferrer" href="https://www.linkedin.com/in/briheet-singh-yadav/">Linkedin</a> | <a target="_blank" rel="noopener noreferrer" href="https://drive.google.com/file/d/1bV-Mwxg_FAKe0rIp1-YmNlY1BAmIIZk7/view">Resume</a>
+      
+    </footer>
+  </body>
+</html>
+
