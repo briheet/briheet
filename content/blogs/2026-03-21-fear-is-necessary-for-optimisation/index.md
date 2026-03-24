@@ -14,6 +14,8 @@ tags:
 
 ## Presentation Slides
 
+<embed src="./presentation.pdf" type="application/pdf" width="100%" height="600px">
+
 **[Download PDF](./presentation.pdf)**
 
 # Overview
