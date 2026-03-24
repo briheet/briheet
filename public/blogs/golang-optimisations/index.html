@@ -62,7 +62,6 @@
 <div class="content-wrapper">
   <main>
     <h2 id="presentation-slides">Presentation Slides</h2>
-<embed src="./presentation.pdf" type="application/pdf" width="100%" height="600px">
 <p><strong><a href="./presentation.pdf">Download PDF</a></strong></p>
 <h1 id="overview">Overview</h1>
 <p>Hey guys, how you guys doing? <br>
@@ -89,6 +88,8 @@ Let&rsquo;s say I want some order to execute, due to things being over the netwo
 </ul>
 <p>So what do we want from our programs really? Reduce overhead of I/O operations, reduce heap allocations, lower down GC pressure, etc.</p>
 <h2 id="basics-and-its-working">Basics and its working</h2>
+<p><img src="./memory/memory_stack_pointer_datadog.png" alt="Datadog"></p>
+<p><img src="./memory/heap_stuff_memory_datadog.png" alt="Datadog"></p>
 <p>SO essentially when we run a golang project, we allocate sum memory, compute something and output something. Where does all that happen ? Lets take a look at it.</p>
 <p><img src="./memory/short_golang_program_sum.png" alt="Simple program"></p>
 <p>This is a simple golang program, it makes a slice, sends it to compute something and gets back the answer. Pretty cool right.
@@ -127,7 +128,7 @@ That’s why you will see there is a branch coming out of BLS below, it calls ru
 <ul>
 <li>R28 = current goroutine (g)</li>
 <li>MOVD 16(R28), R16 loads g.stackguard0</li>
-<li>CMP R16, SP checks if the current stack pointer is too close to the guard</li>
+<li>CMP R16, RSP checks if the current stack pointer is too close to the guard</li>
 <li>If it’s too close, it calls runtime.morestack to grow the goroutine’s stack</li>
 </ul>
 <p>As I said, R28 is the current goroutine in the Go ABI screenshot. So how does a goroutine look like or laid out that 16 offset on R28 (current goroutine) gives us the stack guard value?
@@ -157,7 +158,7 @@ So here we can see that
 56 + 8 =&gt; 64, 64 + 8 =&gt; 72, 72 + 8 =&gt; 80, 80 + 8 =&gt; 88 <br>
 So thats 88 - 56 = 32; (4 * 8)</p>
 <p>Hence we can see that the numbers live at stack frame and according to bytes and we know there starting. \</p>
-<p>Now till here we can see why our programs in 88 right ? Now lets go ahead.</p>
+<p>Now we can see that our slice data occupies offsets 56–88 in the stack frame (32 bytes for 4 int64s). Now lets go ahead.</p>
 <p>+Now let’s look at the loop that sums the slice. This is the inlined <code>sum</code>:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-asm" data-lang="asm"><span style="display:flex;"><span><span style="color:#a6e22e">MOVD</span> <span style="color:#66d9ef">ZR</span>, <span style="color:#66d9ef">R0</span>                          <span style="color:#75715e">;R0 = 0        (i = 0)
 </span></span></span><span style="display:flex;"><span><span style="color:#a6e22e">MOVD</span> <span style="color:#66d9ef">ZR</span>, <span style="color:#66d9ef">R2</span>                          <span style="color:#75715e">;R2 = 0        (sum = 0)
@@ -177,13 +178,13 @@ So thats 88 - 56 = 32; (4 * 8)</p>
 </span></span></code></pre></div><p>Why the jump before the loop body? It’s a common pattern: initialize <code>i</code> and <code>sum</code>, then jump to the condition check, then loop back into the body if <code>i &lt; 4</code>.
 This prevents executing the body once before the first check.</p>
 <p>Why <code>R0&lt;&lt;3</code>? Each <code>int</code> is 8 bytes on 64‑bit, so <code>index * 8</code> gives the byte offset.
-<img src="https://tip.golang.org/src/cmd/compile/abi-internal" alt="Stack layout"></p>
+<a href="https://tip.golang.org/src/cmd/compile/abi-internal">ABI reference</a></p>
 <p>Cool, I hope everything is fine till here. I hope you guys understand :), I can just hope.</p>
 <p>So now here comes the most weird part.
 If you are into systems and have written C++ or Rust code, or even seen the Datadog slide screenshot above, you would be knowing that heap escapes are the worst.
 The compiler has to fetch it first and the whole flow takes time.
 So when optimising the code we usually keep functions small and inlined (keep functions under cost 80) and reduce escapes to heap. \</p>
-<p>But check this out, a normal fmt.Println call does a call to runtime.convT64(SB) which is a call to Static Base. So essentially Static Base is for global symbols and functions. <br>
+<p>But check this out, a normal fmt.Println call does a call to runtime.convT64(SB). Here <code>(SB)</code> means the symbol is addressed relative to the Static Base pseudo-register, which is how Go assembly references global symbols and functions. <br>
 <img src="./memory/runtime_call_print.png" alt="Runtime call pic"></p>
 <p>But why here? Turns out that calling fmt.Println(answer) causes interface boxing, which often makes the value escape and triggers a call to runtime.convT64.
 Check the implementation of <img src="./memory/convT64.png" alt="convT64">
@@ -198,11 +199,11 @@ To remove this, we would need to write to os.Stdout.WriteString and use the strc
 but that also has runtime.StringFormatInt which also has a call to runtime.panicSlice so let&rsquo;s not go that way.</p>
 <p>So the point here was we can see interface store at</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-asm" data-lang="asm"><span style="display:flex;"><span><span style="color:#a6e22e">STP</span> (<span style="color:#66d9ef">ZR</span>, <span style="color:#66d9ef">ZR</span>), <span style="color:#ae81ff">88</span>(<span style="color:#66d9ef">RSP</span>)                <span style="color:#75715e">// stp xzr, xzr, [sp,#88]
-</span></span></span></code></pre></div><p>this at +16 as store for interface is value and its pointer. Hence now we have our RSP at 88 + 16 =&gt; 104. Not going into remaining it should be some func calls or so.</p>
+</span></span></span></code></pre></div><p>this at +16 as store for interface is value and its pointer. Hence the highest offset used in the frame is 88 + 16 =&gt; 104. The remaining 8 bytes (up to the 112-byte frame) account for alignment or other bookkeeping.</p>
 <h2 id="profiling">Profiling</h2>
 <h1 id="cpu-profilling">Cpu profilling</h1>
 <p>CPU profiling is measuring where your program spends CPU time. It records which functions and lines consume the most CPU cycles, so you know what to optimize.</p>
-<p>Lets start profiling some code and see what we have. I have added the code for this section on github at <a href="github.com/briheet/go_elixir_talk">Here</a></p>
+<p>Lets start profiling some code and see what we have. I have added the code for this section on github at <a href="https://github.com/briheet/go_elixir_talk">Here</a></p>
 <p>So here is our golang program</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#f92672">package</span> <span style="color:#a6e22e">main</span>
 </span></span><span style="display:flex;"><span>
@@ -633,7 +634,7 @@ use it.</p>
 </span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">bufPool</span>.<span style="color:#a6e22e">Put</span>(<span style="color:#a6e22e">bp</span>)
 </span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">result</span>
 </span></span><span style="display:flex;"><span>}
-</span></span></code></pre></div><p>What the helly, how can you i do this. So essentailly we can use a bufferPool, get the buf, use it to dump items, ints, use unsafe for string and return the buf. I would say
+</span></span></code></pre></div><p>What the helly, how can you i do this. So essentailly we can use a bufferPool, get the buf, use it to dump items, ints, convert to string with <code>string(buf)</code> (a safe copy) and return the buf. I would say
 this is not a hot path hence this is a bit overkill but <code>performance nerds looks for performance everwhere ;)</code></p>
 <p>TODO: Please add simd stuff here.</p>
 <p>So now lets compare with our baseline benchmarks how much we went better.</p>
