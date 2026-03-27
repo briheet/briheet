@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+    <link rel="manifest" href="/images/site.webmanifest">
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="A simple, minimal blog for those who love text.">
+    <title> | Home</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/fonts.css" />
+    <link rel="stylesheet" href="https://www.briheet.com/css/theme-override.css">
+    
+  </head>
+
+  <body>
+    <header>
+      <nav>
+        <ul>
+          
+          
+          <li class="pull-left ">
+            <a href="https://www.briheet.com/">~/home</a>
+          </li>
+          
+          
+          <li class="pull-left ">
+            <a href="/blogs/">~/blogs</a>
+          </li>
+          
+          
+          <li class="pull-left current">
+            <a href="/work-ex">~/work-ex</a>
+          </li>
+          
+
+          
+
+        </ul>
+      </nav>
+    </header>
+
+
+
+<div class="content-wrapper">
+
+  <h1></h1>
+  
+
+  <p>This page includes my work experience over the time. This is in latest to oldest order.</p>
+<h2 id="socratese-software-solutions-present">Socratese software solutions (Present)</h2>
+<p><strong>Place</strong>: Remote (London, United Kingdom) <br>
+<strong>Type</strong>: Part time <br>
+<strong>Timeline</strong>: Feb 2025 - Present <br>
+<strong>Position</strong>: Engineer <br>
+<strong>Work</strong>:</p>
+<ul>
+<li>Low latency work. Optimisations over the base. Mostly dealt with golang a bit of deployment.</li>
+<li>Includes optimisation on arm64 (no laptop for x86_64 &#x1f62d;), profiling, benching, etc.</li>
+<li>Dealing with browser flows via har retireval of workflows and findings gaps to optimize, things to take advantage of to compete better.</li>
+<li>Hetzner server benchmarking for better server proximity. Basically all the things one can take advantage of.</li>
+</ul>
+<h2 id="cozyart-present">Cozy.Art (Present)</h2>
+<p><strong>Place</strong>: Remote (Denver, Colorado, United States) <br>
+<strong>Type</strong>: Full time <br>
+<strong>Timeline</strong>: July 2025 - Present <br>
+<strong>Position</strong>: Golang Engineer <br>
+<strong>Work</strong>:</p>
+<ul>
+<li>Writing infrastructure for Gen AI Media.</li>
+<li>Dealing with orchestrators, workers in python (pytorch) and rust (candle-rs) to generate media by inferencing on media providers such as runpod.</li>
+<li>Dealing deployments with nixos-anywhere and deploy-rs on vm&rsquo;s via flakes. Also managing db and backups on neon, blob at digital ocean spaces.</li>
+<li>Built a video streaming platform serving about 60k+ users at peak via HLS. Good traffic retension and good money flow.</li>
+<li>The previous system had a mysql instance with media as internal file system which was the bottleneck and file serving issue hence did migrate the whole system alone to postgres and cloudflare r2 and ceph as backup.</li>
+<li>We had the requirement to use SpacetimeDB but it didnt had golang client hence ended up write a client for it to be used by our system to interact.</li>
+</ul>
+<h2 id="ameeba">Ameeba</h2>
+<p><strong>Place</strong>: Remote (Sunnyvale, California, United States) <br>
+<strong>Type</strong>: Part time <br>
+<strong>Timeline</strong>: Oct 2025 - Nov 2025 <br>
+<strong>Position</strong>: Golang Backend Engineer <br>
+<strong>Work</strong>:</p>
+<ul>
+<li>Writing a reverse proxy in pure golang.</li>
+<li>Had some hardcore requirements to deal with systems for privacy hence custom proxy implementation.</li>
+<li>mTLS, oidc, authn, authz, and a bunch of features.</li>
+</ul>
+<h2 id="backend-engineer-intern">Backend Engineer Intern</h2>
+<p><strong>Place</strong>: Remote (Miami, Florida, United States) <br>
+<strong>Type</strong>: Full time <br>
+<strong>Timeline</strong>: Feb 2025 - May 2025 <br>
+<strong>Position</strong>: Intern <br>
+<strong>Work</strong>:</p>
+<ul>
+<li>Writing trading gateways for coinbase international, coinbase us.</li>
+<li>Used FIX, websockets for market data, Resolved a bunch of bugs due to the pre use of AI.</li>
+<li>Tests and stuff. Got a 6 month offer but left after a sometime due to a better ops.</li>
+</ul>
+
+
+  <ul>
+     
+     
+     
+   </ul>
+</div>
+    <footer>
+      
+      
+      <script>
+      (function() {
+        function center_el(tagName) {
+          var tags = document.getElementsByTagName(tagName), i, tag;
+          for (i = 0; i < tags.length; i++) {
+            tag = tags[i];
+            var parent = tag.parentElement;
+            
+            if (parent.childNodes.length === 1) {
+              
+              if (parent.nodeName === 'A') {
+                parent = parent.parentElement;
+                if (parent.childNodes.length != 1) continue;
+              }
+              if (parent.nodeName === 'P') parent.style.textAlign = 'center';
+            }
+          }
+        }
+        var tagNames = ['img', 'embed', 'object'];
+        for (var i = 0; i < tagNames.length; i++) {
+          center_el(tagNames[i]);
+        }
+      })();
+      </script>
+
+      
+      <hr/>
+      <a target="_blank" rel="noopener noreferrer" href="https://github.com/briheet">Github</a> | <a target="_blank" rel="noopener noreferrer" href="https://x.com/brsy_10">X</a> | <a target="_blank" rel="noopener noreferrer" href="https://www.linkedin.com/in/briheet-singh-yadav/">Linkedin</a> | <a target="_blank" rel="noopener noreferrer" href="https://drive.google.com/file/d/1bV-Mwxg_FAKe0rIp1-YmNlY1BAmIIZk7/view">Resume</a>
+      
+    </footer>
+  </body>
+</html>
+

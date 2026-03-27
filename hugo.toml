@@ -31,6 +31,11 @@ name = "Blogs"
 url = "/blogs/"
 weight = 1
 
+[[menu.main]]
+name = "Work-ex"
+url = "/work-ex"
+weight = 1
+
 [params]
 custom_css = ["css/theme-override.css"]
 description = "A simple, minimal blog for those who love text."
