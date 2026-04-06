@@ -40,7 +40,7 @@ This page includes my work experience over the time. This is in latest to oldest
 * mTLS, oidc, authn, authz, and a bunch of features. 
 
 
-## Backend Engineer Intern
+## GoQuant
 
 **Place**: Remote (Miami, Florida, United States) \
 **Type**: Full time \

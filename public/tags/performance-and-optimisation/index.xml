@@ -1,26 +1,19 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Research on Home</title>
-    <link>https://www.briheet.com/tags/research/</link>
-    <description>Recent content in Research on Home</description>
+    <title>Performance and Optimisation on Home</title>
+    <link>https://www.briheet.com/tags/performance-and-optimisation/</link>
+    <description>Recent content in Performance and Optimisation on Home</description>
     <generator>Hugo</generator>
     <language>en-us</language>
     <lastBuildDate>Sun, 29 Mar 2026 00:00:00 +0000</lastBuildDate>
-    <atom:link href="https://www.briheet.com/tags/research/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://www.briheet.com/tags/performance-and-optimisation/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Trying out meta&#39;s hackthon</title>
       <link>https://www.briheet.com/blogs/machine-learning/</link>
       <pubDate>Sun, 29 Mar 2026 00:00:00 +0000</pubDate>
       <guid>https://www.briheet.com/blogs/machine-learning/</guid>
       <description>&lt;h1 id=&#34;intro&#34;&gt;Intro&lt;/h1&gt;&#xA;&lt;p&gt;Hey, how&amp;rsquo;s it going ? Hope you&amp;rsquo;re doing well.&lt;/p&gt;&#xA;&lt;p&gt;Yesterday night i was on discord bing chilling with one of my friend when he told me about&#xA;this cool hackathon by meta and scaler. I was bored, it was a saturday and i didn&amp;rsquo;t have&#xA;anything else to do hence i thought i might give a look wtf is it.&lt;/p&gt;&#xA;&lt;p&gt;To my suprise, it is so cool. I registered, went through their repo and it was what i was looking for.&#xA;For some past days, i have been doing performance work writing low latency systems in golang.&#xA;I also have a blog for it. The thing is, it is quite tiresome, needs good scoping in the system&#xA;and also a lot of reading and going through stuff.&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>Building a Persistent KV Store with B-epsilon Trees</title>
-      <link>https://www.briheet.com/blogs/db/</link>
-      <pubDate>Sat, 14 Feb 2026 00:00:00 +0000</pubDate>
-      <guid>https://www.briheet.com/blogs/db/</guid>
-      <description>&lt;h1 id=&#34;research-notes&#34;&gt;Research Notes&lt;/h1&gt;&#xA;&lt;p&gt;I want to build a persistent key-value store based on B-epsilon trees.&#xA;I looked at LevelDB but it&amp;rsquo;s written in C++, which isn&amp;rsquo;t my preference. So I decided to write this in Rust since I haven&amp;rsquo;t touched it in a while.&#xA;I&amp;rsquo;m also a bit tired of Go at this point due to its syntax, error handling, and GC overhead.&lt;/p&gt;&#xA;&lt;h2 id=&#34;understanding-lsm-trees&#34;&gt;Understanding LSM Trees&lt;/h2&gt;&#xA;&lt;p&gt;I started by learning about LSM trees. ScyllaDB has a good introductory article on it:&lt;/p&gt;</description>
     </item>
   </channel>
 </rss>
