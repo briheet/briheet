@@ -1,6 +1,6 @@
 This page includes my work experience over the time. This is in latest to oldest order.
 
-## Socratese software solutions (Present)
+## Socratese software solutions
 
 **Place**: Remote (London, United Kingdom) \
 **Type**: Part time \
