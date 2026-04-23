@@ -1,24 +1,11 @@
 This page includes my work experience over the time. This is in latest to oldest order.
 
-## Socratese software solutions
-
-**Place**: Remote (London, United Kingdom) \
-**Type**: Part time \
-**Timeline**: Feb 2025 - Present \
-**Position**: Engineer \
-**Work**:
-* Low latency work. Optimisations over the base. Mostly dealt with golang a bit of deployment. 
-* Includes optimisation on arm64 (no laptop for x86_64 :sob:), profiling, benching, etc. 
-* Dealing with browser flows via har retireval of workflows and findings gaps to optimize, things to take advantage of to compete better.
-* Hetzner server benchmarking for better server proximity. Basically all the things one can take advantage of.
-
-
 ## Cozy.Art (Present)
 
 **Place**: Remote (Denver, Colorado, United States) \
 **Type**: Full time \
 **Timeline**: July 2025 - Present \
-**Position**: Golang Engineer \
+**Position**: Software Engineer \
 **Work**: 
 * Writing infrastructure for Gen AI Media. 
 * Dealing with orchestrators, workers in python (pytorch) and rust (candle-rs) to generate media by inferencing on media providers such as runpod. 
@@ -26,6 +13,19 @@ This page includes my work experience over the time. This is in latest to oldest
 * Built a video streaming platform serving about 60k+ users at peak via HLS. Good traffic retension and good money flow.
 * The previous system had a mysql instance with media as internal file system which was the bottleneck and file serving issue hence did migrate the whole system alone to postgres and cloudflare r2 and ceph as backup.
 * We had the requirement to use SpacetimeDB but it didnt had golang client hence ended up write a client for it to be used by our system to interact.
+
+
+## Socratese software solutions
+
+**Place**: Remote (London, United Kingdom) \
+**Type**: Part time \
+**Timeline**: Feb 2025 - April 2025\
+**Position**: Engineer \
+**Work**:
+* Low latency work. Optimisations over the base. Mostly dealt with golang a bit of deployment. 
+* Includes optimisation on arm64 (no laptop for x86_64 :sob:), profiling, benching, etc. 
+* Dealing with browser flows via har retireval of workflows and findings gaps to optimize, things to take advantage of to compete better.
+* Hetzner server benchmarking for better server proximity. Basically all the things one can take advantage of.
 
 
 ## Ameeba

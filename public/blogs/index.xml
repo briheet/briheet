@@ -6,8 +6,15 @@
     <description>Recent content in Blogs on Home</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 29 Mar 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 12 Apr 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://www.briheet.com/blogs/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Notes on reading halloy source code</title>
+      <link>https://www.briheet.com/blogs/rust/</link>
+      <pubDate>Sun, 12 Apr 2026 00:00:00 +0000</pubDate>
+      <guid>https://www.briheet.com/blogs/rust/</guid>
+      <description>&lt;h1 id=&#34;intro&#34;&gt;Intro&lt;/h1&gt;&#xA;&lt;p&gt;Hey, how&amp;rsquo;s it going ? Hope you&amp;rsquo;re doing well.&lt;/p&gt;&#xA;&lt;p&gt;From some days, i have been trying out iced direct from create and soruce code but whenever i&#xA;write it i feel i am not writing rust in a idomatic way. So i thought to read a open source&#xA;codebase to understand a popular project on how to write a system from start to end, find design&#xA;decisions, why something is written in someway and how can i learn from it and write my own&#xA;applications end to end.&lt;/p&gt;</description>
+    </item>
     <item>
       <title>Trying out meta&#39;s hackthon</title>
       <link>https://www.briheet.com/blogs/machine-learning/</link>

@@ -6,8 +6,36 @@
     <description>Recent content in Tags on Home</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 29 Mar 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 12 Apr 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://www.briheet.com/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Gui</title>
+      <link>https://www.briheet.com/tags/gui/</link>
+      <pubDate>Sun, 12 Apr 2026 00:00:00 +0000</pubDate>
+      <guid>https://www.briheet.com/tags/gui/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Iced</title>
+      <link>https://www.briheet.com/tags/iced/</link>
+      <pubDate>Sun, 12 Apr 2026 00:00:00 +0000</pubDate>
+      <guid>https://www.briheet.com/tags/iced/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Notes</title>
+      <link>https://www.briheet.com/tags/notes/</link>
+      <pubDate>Sun, 12 Apr 2026 00:00:00 +0000</pubDate>
+      <guid>https://www.briheet.com/tags/notes/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Rust</title>
+      <link>https://www.briheet.com/tags/rust/</link>
+      <pubDate>Sun, 12 Apr 2026 00:00:00 +0000</pubDate>
+      <guid>https://www.briheet.com/tags/rust/</guid>
+      <description></description>
+    </item>
     <item>
       <title>Machine Learning</title>
       <link>https://www.briheet.com/tags/machine-learning/</link>
@@ -83,13 +111,6 @@
       <link>https://www.briheet.com/tags/kv/</link>
       <pubDate>Sat, 14 Feb 2026 00:00:00 +0000</pubDate>
       <guid>https://www.briheet.com/tags/kv/</guid>
-      <description></description>
-    </item>
-    <item>
-      <title>Rust</title>
-      <link>https://www.briheet.com/tags/rust/</link>
-      <pubDate>Sat, 14 Feb 2026 00:00:00 +0000</pubDate>
-      <guid>https://www.briheet.com/tags/rust/</guid>
       <description></description>
     </item>
     <item>

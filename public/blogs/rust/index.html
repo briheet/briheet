@@ -9,8 +9,8 @@
 
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="A simple, minimal blog for those who love text.">
-    <title>Rust | Home</title>
+    <meta name="description" content="This is my personal notes of diving into halloy source code, an IRC application written in Rust.">
+    <title>Notes on reading halloy source code | Home</title>
     <link rel="stylesheet" href="/css/style.css" />
     <link rel="stylesheet" href="/css/fonts.css" />
     <link rel="stylesheet" href="https://www.briheet.com/css/theme-override.css">
@@ -28,7 +28,7 @@
           </li>
           
           
-          <li class="pull-left ">
+          <li class="pull-left current">
             <a href="/blogs/">~/blogs</a>
           </li>
           
@@ -45,29 +45,43 @@
     </header>
 
 
+<div class="article-meta">
+<h1><span class="title">Notes on reading halloy source code</span></h1>
+
+<h2 class="date">2026/04/12</h2>
+<p class="terms">
+  
+  
+  Categories: <a href="/categories/blogs">blogs</a> 
+  
+  
+  
+  Tags: <a href="/tags/rust">Rust</a> <a href="/tags/iced">Iced</a> <a href="/tags/notes">Notes</a> <a href="/tags/gui">Gui</a> 
+  
+  
+</p>
+</div>
+
+
 
 <div class="content-wrapper">
+  <main>
+    <h1 id="intro">Intro</h1>
+<p>Hey, how&rsquo;s it going ? Hope you&rsquo;re doing well.</p>
+<p>From some days, i have been trying out iced direct from create and soruce code but whenever i
+write it i feel i am not writing rust in a idomatic way. So i thought to read a open source
+codebase to understand a popular project on how to write a system from start to end, find design
+decisions, why something is written in someway and how can i learn from it and write my own
+applications end to end.</p>
+<p>These are my personal notes, this can be wrong and well as right. Dont take this seriously.
+Not only halloy, i would maybe also quote other projects as Helix to understand its codebase
+try to get some good ways to write something.</p>
+<h1 id="start">Start</h1>
+<p>The programs inits with src/main.rs with return of Result&lt;(), Box<dyn std::error::Error>&gt;. The reason of Box is due to dynamic dispatch of trait.
+Its a way for generic programming. The compiler wants to know at compile time</p>
 
-  <h1>Rust</h1>
-  
-
-  
-
-  <ul>
-     
-     
-     
-     <li>
-       <span class="date">2026/04/12</span>
-       <a href="/blogs/rust/">Notes on reading halloy source code</a>
-     </li>
-     
-     <li>
-       <span class="date">2026/02/14</span>
-       <a href="/blogs/db/">Building a Persistent KV Store with B-epsilon Trees</a>
-     </li>
-     
-   </ul>
+    <a href="/"> >> Home</a>
+  </main>
 </div>
     <footer>
       
