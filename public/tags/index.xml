@@ -6,43 +6,8 @@
     <description>Recent content in Tags on Home</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 29 Mar 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 21 Mar 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://www.briheet.com/tags/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>Machine Learning</title>
-      <link>https://www.briheet.com/tags/machine-learning/</link>
-      <pubDate>Sun, 29 Mar 2026 00:00:00 +0000</pubDate>
-      <guid>https://www.briheet.com/tags/machine-learning/</guid>
-      <description></description>
-    </item>
-    <item>
-      <title>Making Life Easy</title>
-      <link>https://www.briheet.com/tags/making-life-easy/</link>
-      <pubDate>Sun, 29 Mar 2026 00:00:00 +0000</pubDate>
-      <guid>https://www.briheet.com/tags/making-life-easy/</guid>
-      <description></description>
-    </item>
-    <item>
-      <title>Performance and Optimisation</title>
-      <link>https://www.briheet.com/tags/performance-and-optimisation/</link>
-      <pubDate>Sun, 29 Mar 2026 00:00:00 +0000</pubDate>
-      <guid>https://www.briheet.com/tags/performance-and-optimisation/</guid>
-      <description></description>
-    </item>
-    <item>
-      <title>Research</title>
-      <link>https://www.briheet.com/tags/research/</link>
-      <pubDate>Sun, 29 Mar 2026 00:00:00 +0000</pubDate>
-      <guid>https://www.briheet.com/tags/research/</guid>
-      <description></description>
-    </item>
-    <item>
-      <title>RL</title>
-      <link>https://www.briheet.com/tags/rl/</link>
-      <pubDate>Sun, 29 Mar 2026 00:00:00 +0000</pubDate>
-      <guid>https://www.briheet.com/tags/rl/</guid>
-      <description></description>
-    </item>
     <item>
       <title>Assembly</title>
       <link>https://www.briheet.com/tags/assembly/</link>
@@ -83,6 +48,13 @@
       <link>https://www.briheet.com/tags/kv/</link>
       <pubDate>Sat, 14 Feb 2026 00:00:00 +0000</pubDate>
       <guid>https://www.briheet.com/tags/kv/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Research</title>
+      <link>https://www.briheet.com/tags/research/</link>
+      <pubDate>Sat, 14 Feb 2026 00:00:00 +0000</pubDate>
+      <guid>https://www.briheet.com/tags/research/</guid>
       <description></description>
     </item>
     <item>

@@ -6,15 +6,8 @@
     <description>Recent content in Blogs on Home</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 29 Mar 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 21 Mar 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://www.briheet.com/categories/blogs/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>Trying out meta&#39;s hackthon</title>
-      <link>https://www.briheet.com/blogs/machine-learning/</link>
-      <pubDate>Sun, 29 Mar 2026 00:00:00 +0000</pubDate>
-      <guid>https://www.briheet.com/blogs/machine-learning/</guid>
-      <description>&lt;h1 id=&#34;intro&#34;&gt;Intro&lt;/h1&gt;&#xA;&lt;p&gt;Hey, how&amp;rsquo;s it going ? Hope you&amp;rsquo;re doing well.&lt;/p&gt;&#xA;&lt;p&gt;Yesterday night i was on discord bing chilling with one of my friend when he told me about&#xA;this cool hackathon by meta and scaler. I was bored, it was a saturday and i didn&amp;rsquo;t have&#xA;anything else to do hence i thought i might give a look wtf is it.&lt;/p&gt;&#xA;&lt;p&gt;To my suprise, it is so cool. I registered, went through their repo and it was what i was looking for.&#xA;For some past days, i have been doing performance work writing low latency systems in golang.&#xA;I also have a blog for it. The thing is, it is quite tiresome, needs good scoping in the system&#xA;and also a lot of reading and going through stuff.&lt;/p&gt;</description>
-    </item>
     <item>
       <title>Fear is Necessary for Optimisation (goylang edition)</title>
       <link>https://www.briheet.com/blogs/golang-optimisations/</link>
