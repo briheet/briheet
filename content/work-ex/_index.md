@@ -4,7 +4,7 @@ This page includes my work experience over the time. This is in latest to oldest
 
 **Place**: Remote (Denver, Colorado, United States) \
 **Type**: Full time \
-**Timeline**: July 2025 - Present \
+**Timeline**: July 2025 - May 2026 \
 **Position**: Software Engineer \
 **Work**: 
 * Writing infrastructure for Gen AI Media. 

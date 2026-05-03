@@ -6,8 +6,15 @@
     <description>Recent content in Blogs on Home</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 21 Mar 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 03 May 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://www.briheet.com/blogs/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Multithreading and Some Rust</title>
+      <link>https://www.briheet.com/blogs/multithreading-rust/</link>
+      <pubDate>Sun, 03 May 2026 00:00:00 +0000</pubDate>
+      <guid>https://www.briheet.com/blogs/multithreading-rust/</guid>
+      <description>&lt;h1 id=&#34;multi-threaded-programming&#34;&gt;Multi-threaded programming&lt;/h1&gt;&#xA;&lt;h2 id=&#34;notes&#34;&gt;Notes&lt;/h2&gt;&#xA;&lt;p&gt;This repo contains source and understanding of multithread programs.&#xA;After writing a lot of concurrent code, i saw a bunch of people fighting over java, go and rust&amp;rsquo;s model.&#xA;Though i might relearn and try everything in rust coz why not!&#xA;Would also like to thanks Britney Spears and Gwen Stefani for accompanying me when i was writing this UwU;&lt;/p&gt;&#xA;&lt;p&gt;I feel one should not touch multi threaded programming or concurrency untill and unles he/she/they understand how its being processed&#xA;on their hardware. This knowledge leads to writing better/maintainable programs, else it is a mess usually.&lt;/p&gt;</description>
+    </item>
     <item>
       <title>Fear is Necessary for Optimisation (goylang edition)</title>
       <link>https://www.briheet.com/blogs/golang-optimisations/</link>
