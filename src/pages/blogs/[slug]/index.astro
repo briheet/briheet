@@ -1,0 +1,64 @@
+---
+import { getCollection, render } from "astro:content";
+import Footer from "../../../components/Footer.astro";
+import Nav from "../../../components/Nav.astro";
+import Layout from "../../../layouts/Layout.astro";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("blogs", ({ data }) => {
+    return import.meta.env.PROD ? data.draft !== true : true;
+  });
+
+  return posts.map((post) => ({
+    params: { slug: post.data.slug },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+
+const formatDate = (date: Date) => {
+  return new Intl.DateTimeFormat("en", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(date);
+};
+---
+
+<Layout title={`${post.data.title} | Briheet Singh Yadav`}>
+  <div class="min-h-screen">
+    <Nav />
+
+    <main class="mx-auto mt-0 max-w-5xl px-6">
+      <article>
+        <header>
+          <h1 class="text-3xl font-semibold tracking-tight text-white">
+            {post.data.title}
+          </h1>
+
+          <div class="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-zinc-500">
+            <time datetime={post.data.date.toISOString()}>
+              {formatDate(post.data.date)}
+            </time>
+
+            {post.data.tags?.map((tag) => <span>{tag}</span>)}
+          </div>
+
+          <p class="mt-5 text-base leading-7 text-zinc-400">
+            {post.data.description}
+          </p>
+        </header>
+
+        <div
+          class="blog-content mt-10 max-w-none text-base leading-7 text-zinc-300"
+        >
+          <Content />
+        </div>
+      </article>
+    </main>
+
+    <Footer />
+  </div>
+</Layout>

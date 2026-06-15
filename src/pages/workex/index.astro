@@ -1,0 +1,24 @@
+---
+import { getCollection, render } from "astro:content";
+import Footer from "../../components/Footer.astro";
+import Nav from "../../components/Nav.astro";
+import Layout from "../../layouts/Layout.astro";
+
+const [workex] = await getCollection("workex");
+
+const { Content } = await render(workex);
+---
+
+<Layout title={`${workex.data.title} | Briheet Singh Yadav`}>
+  <div class="min-h-screen">
+    <Nav />
+
+    <main class="mx-auto mt-0 max-w-5xl px-6">
+      <article class="blog-content max-w-none text-base leading-7 text-zinc-300">
+        <Content />
+      </article>
+    </main>
+
+    <Footer />
+  </div>
+</Layout>
