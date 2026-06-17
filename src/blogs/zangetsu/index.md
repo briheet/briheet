@@ -1,7 +1,7 @@
 ---
 title: Zangetsu - A desktop application for media generation
 date: 2026-06-17
-slug: stable diffusion
+slug: zangetsu
 description: Zangetsu is a self hosted application for media generation via adapters, workers by inference on on-demand pods on runpod.
 categories:
   - blogs
@@ -163,4 +163,3 @@ I tried accessing its lsp stuff but found it quite bad. I was always reaching fo
 
 Riverqueue is quite good, but i think writing my own worker would've been good. Riverqueue attaches to postgres
 and one does Riverqueue migrations to setup its tables in Postgres. 
-
