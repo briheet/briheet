@@ -171,6 +171,8 @@ I have been reading whatever i could find for distributed simulation testing.
 I also want to add it around the render pipeline. This should catch lifecycle bugs like stuck jobs,
 duplicate completions, stale pods, worker disconnects, and scheduler races before they show up in production.
 
+The current deployment is via container. I would like to shift this to a systemd via nixos-anywhere and deploy-rs.
+
 I would also rewrite worker as zig inference with onnx or candle-rs that's Rust, but thats a personal project.I dont really find python
 any intutive. Coming from Go, Rust and Zig, its one of the worst things i wrote. I think programming golang for so long i kept reaching out for
 ```go
