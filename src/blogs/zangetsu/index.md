@@ -2,7 +2,7 @@
 title: Zangetsu - A desktop application for media generation
 date: 2026-06-17
 slug: zangetsu
-description: Zangetsu is a self hosted application for media generation via adapters, workers by inference on on-demand pods on runpod.
+description: Zangetsu is a self hosted application for media generation via adapters, model catalogues, graph workflows, and workers running inference on on-demand pods on runpod.
 categories:
   - blogs
 tags:
@@ -20,9 +20,13 @@ Few of my friends were curious to as what they are and how can they generate med
 There are a lot if places one can go, nanobana and multiple places. However most of they are either slow,
 hard to keep track of generated media, costly, yade yade yada.
 
+![Main](./images/main.png)
+
 This prompted me to build something which is easy to use, doesn't cost that much, has a desktop based application
 which is fast, small binary, performant and looks good aswell.
 Hence i ended up building zangetsu. Below is the full architecture and design decision i took while building it.
+
+![Workflow](./images/workflow.png)
 
 # System Architecture
 
@@ -41,6 +45,8 @@ A particular adapter can be of different types and different models. Current it 
 So one goes to the generation page, inputs his prompt which is then sent to `Backend API`, from where is gets built as jobs with
 number of generations, variations if so, and posted in postgres table.
 The main scope of backend here is building jobs, frontend api infos, settings, workspaces, users queries, etc.
+
+There is also a graph workflow page now. I treat it as another way to prepare render jobs, not as a replacement for the normal generation pages.
 
 The job then gets picked up by `Orchestrator` by periodic jobs provided by `Riverqueue` which polls searching for pending jobs
 in DB (i know this is bad and should be an event maybe use nats here would be a right choice but its just a operational overhead
@@ -80,6 +86,24 @@ I am a test driven person so it helps injecting dependencies with ease. All test
 `TestContainers`. I find it really easy and nice to have. One can easily apply all migrations and state, have a snapshot and retrieve it in another test.
 Thats it, backend usually deals with Accounts, Workspace, Catalogue, Render, Assets, Collections routes, etc. I use `uber/zap` for our logger.
 
+It also has APIs for graph workflows now. The graph run does not have a separate render system. A Model Router node still creates a normal render job,
+so the same queue, orchestrator and worker path gets used.
+
+There is a prompt enhancement API aswell. The frontend sends a rough prompt from text-image, text-video or image-video page,
+and backend returns a cleaner generation prompt. I kept this behind the backend so the desktop app does not need to know any model/provider secrets.
+
+Models can also be seeded now. The model list lives in `services/backend/config.toml`, previews live inside `services/backend/data/models`,
+and docker compose has a `backend-seed` job. Seeded models are global models, so a user does not need to upload the same base models again and again.
+
+## Generation Flow
+
+Generation Flow is basically a node canvas for the times when one prompt box feels too small.
+It has nodes like `Image`, `Image DNA`, `Text`, `Prompt Builder`, `Model Router`, `Evaluator` and `Export`.
+
+The normal generation pages are still the fastest path. This graph page is more for chaining context together.
+For example, an image plus a small paragraph can go into Image DNA, then Prompt Builder, then a Model Router.
+Before running, the graph gets compiled so broken flows fail early instead of becoming weird render jobs.
+
 ## Orchestrator
 
 I wanted something which is lightweight, stateless, can go down and still recover state. Hence i ended up adding an Orchestrator to the stack.
@@ -100,6 +124,9 @@ We have `Postgres` and our source of truth. It is paired with `PgAdmin`. It stor
 RustFS is used for the heavy stuff: uploaded files, LoRAs, references, previews and generated outputs. I mostly use presigned urls.
 Till now i have used almost all from s3 to digital ocean spaces to minio to dynamodb.
 
+Uploads to asset library also carry a small description now. Generated assets already have the prompt which created them.
+This is useful for graph flows because an image is not just pixels there. It also has text context attached to it.
+
 I wanted to self host this to keep costs down for now hence first choice was minio but the maintenance mode got me.
 Hence i tried using RustFS and it hasnt caused any problems till now.
 I have a job running for taking postgres dumps everyday via `pg_dump`. I was thinking to keep backups at BackBlaze but nah.
@@ -115,6 +142,9 @@ When the worker starts, it connects back to the orchestrator over secure gRPC an
 
 The worker downloads LoRAs and input assets using presigned URLs, loads or reuses the model pipeline, runs inference, uploads output files, and reports progress back.
 Worker does not touches Postgres. Worker does not get long-lived storage keys. Worker just does the GPU work.
+
+I also added more model paths here while testing video generation. Wan, Hunyuan, SkyReels, LTX and SVD like models all need slightly different pipeline code.
+The worker image is pinned around CUDA 12.8 / Torch 2.7 because video models are quite picky about runtime.
 
 ![Worker](./images/inference_worker.png)
 
@@ -170,6 +200,9 @@ wrong checksums, broken worker events, missing output refs and payloads that pas
 I have been reading whatever i could find for distributed simulation testing.
 I also want to add it around the render pipeline. This should catch lifecycle bugs like stuck jobs,
 duplicate completions, stale pods, worker disconnects, and scheduler races before they show up in production.
+
+On product side, graph workflow still has a lot to improve. Real Image DNA should probably come from a vision model,
+there should be better run history, and rerunning from a middle node would be nice instead of always thinking of the graph as one full run.
 
 The current deployment is via container. I would like to shift this to a systemd via nixos-anywhere and deploy-rs.
 
