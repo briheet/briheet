@@ -12,6 +12,8 @@ tags:
   - Runpod
 ---
 
+Here is a youtube video if you dont like reading: [Click me](https://youtu.be/b7eMMqqiO9U?si=249gXZz0Q06jdcU-)
+
 # Why I built Zangetsu ?
 
 Hey there, how's it going ? \
