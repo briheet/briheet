@@ -217,4 +217,7 @@ in my code in places where i think it should've been. Also i dont know its tooli
 I tried accessing its lsp stuff but found it quite bad. I was always reaching for source code to read info.
 
 Riverqueue is quite good, but i think writing my own worker would've been good. Riverqueue attaches to postgres
-and one does Riverqueue migrations to setup its tables in Postgres. 
+and one does Riverqueue migrations to setup its tables in Postgres.
+
+Also i got this : )
+![Cuite](./images/cutie.heic)
