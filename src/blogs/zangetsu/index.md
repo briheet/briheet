@@ -220,4 +220,4 @@ Riverqueue is quite good, but i think writing my own worker would've been good. 
 and one does Riverqueue migrations to setup its tables in Postgres.
 
 Also i got this : )
-![Cuite](./images/cutie.heic)
+![Cuite](./images/cutie.png)
