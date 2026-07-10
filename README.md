@@ -7,7 +7,6 @@ somethings i've built on the side:
 
 and more...
 
-i write blogs at: [check out my blogs](https://www.briheet.com/blogs/) \
-some workex: [check out my workex](https://www.briheet.com/workex/)
+i write blogs at: [check out my blogs](https://www.briheet.com/blogs/), some workex: [check out my workex](https://www.briheet.com/workex/)
 
-feel free to hit me up for anything...
+feel free to hit me up for anything at briheetyadav[@]gmail[.]com
