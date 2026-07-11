@@ -1,9 +1,10 @@
 i am an engineer who loves working on hard problems, evaluating different different tools, having an opinion, etc.
 
 somethings i've built on the side:
-* [Zangetsu](https://www.briheet.com/blogs/zangetsu/): graph based media generation platform
-* [ns-tui](https://github.com/briheet/ns-tui): tui for searching nix pkgs, hm options
-* [kquetolk](https://github.com/briheet/kquetolk): redis compatible resp server benchmarked with memtier
+* [zangetsu](https://www.briheet.com/blogs/zangetsu/): Graph based media generation platform
+* [ns-tui](https://github.com/briheet/ns-tui): Tui for searching nix pkgs, hm options
+* [kquetolk](https://github.com/briheet/kquetolk): Redis compatible resp server benchmarked with memtier
+* [kizuna](https://github.com/briheet/kizuna): AI engineering memory graph for modern software teams
 
 and more...
 
