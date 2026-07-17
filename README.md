@@ -8,6 +8,8 @@ somethings i've built on the side:
 * [inferno](https://github.com/briheet/inferno): Helps in generating media locally, written in rust with candle-rs
 * [webcread](https://github.com/briheet/WebCread): Webcam implementation in rust
 * [goperflab](https://github.com/briheet/goperflab): Openenv implementation for performance checking and patching in golang programs
+* [trees_rust](https://github.com/briheet/trees_rust): Implementation for various trees(cartesian, ...) in rust
+<!-- * [papers_rust](https://github.com/briheet/papers_rust): Implementation for various papers(dynamo, ...) in rust -->
 
 and more...
 
