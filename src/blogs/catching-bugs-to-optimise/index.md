@@ -563,14 +563,14 @@ So our end performance with vm configs comes down to:
 
 # Conclusion
 
-I ended up submitting this, the interview went pretty great. Here is the Read AI summary about it:
+I ended up submitting this, the interview went pretty great. Here is the Read AI summary about what we talked:
 
-Brief overview of backend architecture and worker design for conversation/inference system.
-• Uses domain repository pattern for interchangeable stores
-• Worker orchestrator: 8 goroutines consuming `NATS JetStream`
-• Load test: `928 workflows/s`; ~1,050 `VUs` on a `4-vCPU`/`8-GB` VM
-• Estimated capacity: ~55k–60k concurrent users (1 msg/min)
-• `PostgreSQL` was the bottleneck; the index cut query execution time from `23 ms` to `0.069 ms`
+Brief overview of backend architecture and worker design for conversation/inference system. \
+• Uses domain repository pattern for interchangeable stores \
+• Worker orchestrator: 8 goroutines consuming `NATS JetStream` \
+• Load test: `928 workflows/s`; ~1,050 `VUs` on a `4-vCPU`/`8-GB` VM \
+• Estimated capacity: ~55k–60k concurrent users (1 msg/min) \
+• `PostgreSQL` was the bottleneck; the index cut query execution time from `23 ms` to `0.069 ms` \
 • PI redaction: worker-side or dedicated service; shorten retention
 
 Really liked the interviewer. Asked me to show code for all things end to end, questioned file persistence, async ack, worker ack, term, nak and how retries will be handled.
