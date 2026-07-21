@@ -1,0 +1,28 @@
+<script>
+  import mermaid from "mermaid";
+
+  mermaid.initialize({
+    startOnLoad: false,
+    theme: "dark",
+  });
+
+  const renderMermaid = async () => {
+    const blocks = [...document.querySelectorAll(".blog-content code.language-mermaid")];
+    const diagrams = blocks.map((code, index) => {
+      const diagram = document.createElement("div");
+      diagram.className = "mermaid-diagram";
+      diagram.id = `mermaid-diagram-${index}`;
+      diagram.textContent = code.textContent ?? "";
+      code.parentElement?.replaceWith(diagram);
+      return diagram;
+    });
+
+    if (diagrams.length > 0) {
+      await mermaid.run({ nodes: diagrams });
+    }
+  };
+
+  renderMermaid().catch((error) => {
+    console.error("Unable to render Mermaid diagrams", error);
+  });
+</script>

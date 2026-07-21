@@ -11,6 +11,11 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
   },
+  markdown: {
+    syntaxHighlight: {
+      excludeLangs: ["mermaid"],
+    },
+  },
   site: "https://www.briheet.com",
   base: "/",
   trailingSlash: "ignore",

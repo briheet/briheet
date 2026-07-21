@@ -12,7 +12,7 @@ tags:
   - Profilers
 ---
 
-Hey, how's it going ? Hope you're doing well.
+Hey, how's it going ? Hope you're doing well. \
 Recently, I was working on an assignment which needed to be completed in a single day. While doing that, I found issues while load testing with k6, which ultimately
 led to a massive increase in the application's workload performance. Here is how it went.
 
@@ -59,7 +59,7 @@ So after somehow building the application end to end, i start load testing on my
 
 # Database Issue
 
-So i started with a basic k6 load testing config. Here is it:
+So i started with a basic k6 load testing config. Here is its config:
 ```sh
 k6 \
   -e BASE_URL="http://<vm-public-ip>:4000/api/v1" \
@@ -142,7 +142,7 @@ WHERE schemaname = 'public'
 ORDER BY indexname;
 ```
 
-```text
+```sql
 inference_logs_pkey
   CREATE UNIQUE INDEX inference_logs_pkey ON inference_logs (id)
 
@@ -298,40 +298,40 @@ So i asked my agents to ssh and get back the `cpu.pprof` and `mem.pprof` from th
 This is usually done by `PersistentPreRunE` and `PersistentPostRunE`. Here is the code:
 
 ```go
-		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 
-			if !profile {
-				return nil
-			}
+	if !profile {
+		return nil
+	}
 
-			f, perr := os.Create("cpu.pprof")
-			if perr != nil {
-				return perr
-			}
+	f, perr := os.Create("cpu.pprof")
+	if perr != nil {
+		return perr
+	}
 
-			if err := pprof.StartCPUProfile(f); err != nil {
-				return errors.Join(err, f.Close())
-			}
-			cpuProfile = f
-			return nil
-		},
-		PersistentPostRunE: func(cmd *cobra.Command, args []string) error {
+	if err := pprof.StartCPUProfile(f); err != nil {
+		return errors.Join(err, f.Close())
+	}
+	cpuProfile = f
+	return nil
+},
+PersistentPostRunE: func(cmd *cobra.Command, args []string) error {
 
-			if !profile {
-				return nil
-			}
+	if !profile {
+		return nil
+	}
 
-			pprof.StopCPUProfile()
-			cpuCloseErr := cpuProfile.Close()
+	pprof.StopCPUProfile()
+	cpuCloseErr := cpuProfile.Close()
 
-			f, perr := os.Create("mem.pprof")
-			if perr != nil {
-				return errors.Join(cpuCloseErr, perr)
-			}
+	f, perr := os.Create("mem.pprof")
+	if perr != nil {
+		return errors.Join(cpuCloseErr, perr)
+	}
 
-			runtime.GC()
-			return errors.Join(cpuCloseErr, pprof.WriteHeapProfile(f), f.Close())
-		}, 
+	runtime.GC()
+	return errors.Join(cpuCloseErr, pprof.WriteHeapProfile(f), f.Close())
+}, 
 ```
 
 This usually records the `CPU` profile of the application and the memory profile, which contains allocation and heap information. So, using `go tool pprof`, I jumped into the files to find anything
@@ -442,7 +442,6 @@ const (
 	streamMaxEventSize      = 1 << 20
 )
 
-
 var streamBufferPool = sync.Pool{New: func() any {
 	buffer := make([]byte, streamInitialBufferSize)
 	return &buffer
@@ -530,15 +529,15 @@ Here is the total comparison between the first and the latest runs. Pretty nice 
 | Time-to-first-token p95 peak | 310.74 ms | 9.72 ms | 19.81 ms | **-93.6%** |
 
 This was nice. So you might ask how much it really impacts theoretically in the real world. So
-* For 600-900: The workflow rate was `591.17/s`. This means if someone does 1 message per/min, it could handle about 35k users.
-* For 1,050: The workflow rate was `928.24/s`. This means if someone does 1 message per/min, it could handle about 55-60k users.
+* For 600-900: The workflow rate was `591.17/s`. This means if someone does 1 message per/min, it could handle about `35,000` users.
+* For 1,050: The workflow rate was `928.24/s`. This means if someone does 1 message per/min, it could handle about `55-60,000` users.
 
 That is a pretty significant bump considering how little we did. Also, let's only analyse `1,050` workflows.
-* One message every 30 seconds: 31,500 active users
-* One message every minute: 63,000 active users
-* One message every five minutes: 315,000 active users
+* One message every 30 seconds: `31,500` active users
+* One message every minute: `63,000` active users
+* One message every five minutes: `315,000` active users
 
-That's really cool.
+That's really cool. Also keep in mind these tests do not have any ratelimiter configured.
 
 So our end performance with vm configs comes down to:
 
@@ -566,7 +565,7 @@ So our end performance with vm configs comes down to:
 
 I ended up submitting this, the interview went pretty great. Here is the Read AI summary about it:
 
-Briief overview of backend architecture and worker design for conversation/inference system.
+Brief overview of backend architecture and worker design for conversation/inference system.
 • Uses domain repository pattern for interchangeable stores
 • Worker orchestrator: 8 goroutines consuming `NATS JetStream`
 • Load test: `928 workflows/s`; ~1,050 `VUs` on a `4-vCPU`/`8-GB` VM
