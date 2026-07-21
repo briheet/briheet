@@ -13,9 +13,13 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "4.3.1",
-    "astro": "6.4.6",
+    "astro": "7.1.0",
+    "js-yaml": "4.3.0",
     "mermaid": "^11.16.0",
     "tailwindcss": "4.3.1",
-    "vite": "7.3.5"
+    "vite": "8.1.5"
+  },
+  "overrides": {
+    "js-yaml": "4.3.0"
   }
 }
