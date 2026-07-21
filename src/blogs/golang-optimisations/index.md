@@ -283,7 +283,7 @@ So our simple test runs fine, now lets write some benchmarks. ![Benchmark](./cpu
 Lets run and check output.
 
 ```bash
-go test -bench=. -benchmem -benchtime=3s -count=10 -cpuprofile=cpu.pprof -memprofile=mem.pprof > benchmark.txt
+go test . -bench=. -benchmem -benchtime=3s -count=10 -cpuprofile=cpu.pprof -memprofile=mem.pprof > benchmark.txt
 ```
 
 This is typically a good way to benchmark. Lets me explain
