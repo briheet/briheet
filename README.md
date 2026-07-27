@@ -4,7 +4,7 @@ somethings i've built on the side:
 * [zangetsu](https://www.briheet.com/blogs/zangetsu/): Graph based media generation platform
 * [ns-tui](https://github.com/briheet/ns-tui): Tui for searching nix pkgs, hm options
 * [kquetolk](https://github.com/briheet/kquetolk): Redis compatible resp server benchmarked with memtier
-* [nozarashi](https://github.com/briheet/nozarashi): Build and orchestrate apple container environments from oci, nix inputs, etc
+* [nozarashi](https://github.com/briheet/nozarashi): Cli+Tui for building and orchestrate apple container environments from oci, nix inputs, etc
 * [kizuna](https://github.com/briheet/kizuna): AI engineering memory graph for modern software teams
 * [inferno](https://github.com/briheet/inferno): Helps in generating media locally, written in rust with candle-rs
 * [webcread](https://github.com/briheet/WebCread): Webcam implementation in rust
