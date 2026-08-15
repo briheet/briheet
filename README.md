@@ -6,6 +6,7 @@ somethings i've built on the side:
 * [kquetolk](https://github.com/briheet/kquetolk): Redis compatible resp server benchmarked with memtier
 * [zml_diffusion](https://github.com/briheet/zml_diffusion): Diffusion pipelines written with zml
 * [nozarashi](https://github.com/briheet/nozarashi): Cli+Tui for building and orchestrating apple container environments from oci, nix inputs, etc
+* [ocd](https://github.com/briheet/ocd): Analyze and compare Dune traces to find performance regressions
 * [yoruichi](https://github.com/briheet/yoruichi): A profiler for TypeScript type-checking
 * [kizuna](https://github.com/briheet/kizuna): AI engineering memory graph for modern software teams
 * [inferno](https://github.com/briheet/inferno): Helps in generating media locally, written in rust with candle-rs
