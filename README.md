@@ -3,6 +3,7 @@ i am an engineer who loves working on hard problems, evaluating different differ
 somethings i've built on the side:
 * [zangetsu](https://www.briheet.com/blogs/zangetsu/): Graph based media generation platform
 * [sen](https://github.com/briheet/sen): Source level runtime and analysis visualization
+* [cats](https://github.com/briheet/cats): Set of macOS widgets and bar to make ricing good and enjoyable
 * [ns-tui](https://github.com/briheet/ns-tui): Tui for searching nix pkgs, hm options
 * [kquetolk](https://github.com/briheet/kquetolk): Redis compatible resp server benchmarked with memtier
 * [zml_diffusion](https://github.com/briheet/zml_diffusion): Diffusion pipelines written with zml
