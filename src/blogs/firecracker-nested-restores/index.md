@@ -16,25 +16,25 @@ tags:
 # Intro
 
 Hey, how's it going ? Hope you're doing well. \
-So lately i have been building a deterministic simulation testing harness for backend services. Actual services and datastores, a seeded workload, injected faults and properties checked at the end.
-Today i did a research experiment around it which went from "this is amazing" to "why is my macbook dying" to "ok this is actually amazing" in a single day. So here is the whole log of it.
+So lately i have been building a deterministic simulation testing harness for backend services. Bunch of systems, seeded workloads, injected faults and properties checked at the end.
+Did some research experimentation around it which went from "this is amazing" to "why is my macbook dying" to "ok this is actually amazing" in a single day. So here is the whole log of it.
 
 This one is long, has a lot of tables and numbers. Grab a coffee :sob:
 
 # Why i wanted this
 
-The key ingredient for deterministic simulation testing on backend services is a sealed machine which can be snapshotted and forked.
+The key ingredient for deterministic simulation testing on system imo is a sealed machine which can be snapshotted and forked.
 Every test run starts from a byte-identical state, and many runs branch from one booted system. I wanted exactly that shape:
 
 1. **Boot** the system under test once (Postgres, Redis, an API) inside a microVM.
 2. **Snapshot** it.
 3. **Restore** a fresh clone per seed, and run many seeds in parallel.
 
-Constraints were simple. Dev happens on MacBooks, CI and scale out will be Linux, and i wanted one runtime and one snapshot format for both.
+Constraints were simple. Dev happens on MacBooks, CI and scale out will be Linux and i wanted one runtime and one snapshot format for both.
 That led me to **Firecracker on KVM**:
 - Its native on Linux.
 - On macOS it runs inside one Linux VM, using Apple's nested virtualization (M3 or later, macOS 15 or later).
-- Snapshot/restore is first class, and restored memory can be shared copy-on-write between clones.
+- Snapshot/restore is first class and restored memory can be shared copy-on-write between clones.
 
 So the question this post answers is: **does nested Firecracker on a Mac actually give you fast, concurrent restores ?** \
 Spoiler, yes. But not the way the docs default gives you.
@@ -64,7 +64,7 @@ The design splits into three commands, each owning a different layer:
 
 | command | layer | owns | lifetime |
 |---|---|---|---|
-| `infra-up` / `infra-down` | Environment | real deps (Postgres, Redis, S3, DynamoDB), the fake world, the fault layer, egress denied | long lived |
+| `infra-up` / `infra-down` | Environment | deps (Postgres, Redis, S3, DynamoDB), the fake world, the fault layer, egress denied | long lived |
 | `sut` | SUT build | fetch project at a ref, build, migrate + seed into a template, verify readiness | when code changes |
 | `run <seed>` | Engine | restore fresh state → boot SUT → setup checks → drivers + faults → heal → liveness checks → report | one seed |
 
@@ -170,7 +170,7 @@ PUT /snapshot/load
  "resume_vm": true}
 ```
 
-# Round 1: it works, and then it doesnt
+# Round 1: it works funking somehow it doesnt
 
 ## Snapshot and single restore: great
 
@@ -240,7 +240,7 @@ At this point i stopped poking at things randomly and went to read how Apple's n
 
 # What's actually going on
 
-**Apple's nested virtualization runs the inner hypervisor in a constrained mode.** Apple's implementation (macOS 26 on M3 and later) supports only **nVHE** for the L1 hypervisor, with VNCR acceleration, and the interrupt controller is Apple's platform vGIC.
+**Apple's nested virtualization runs the inner hypervisor in a constrained mode.** Apple's implementation (macOS 26 on M3 and later) supports only **nVHE** for the L1 hypervisor, with VNCR acceleration and the interrupt controller is Apple's platform vGIC.
 So when the Linux VM's KVM runs a Firecracker guest:
 - every exit from that guest goes guest → Apple's hypervisor → the Linux VM's EL2 stub → the Linux kernel, and back;
 - some EL2 register and interrupt controller accesses trap all the way to Apple.
