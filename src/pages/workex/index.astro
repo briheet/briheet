@@ -9,11 +9,15 @@ const [workex] = await getCollection("workex");
 const { Content } = await render(workex);
 ---
 
-<Layout title={`${workex.data.title} | Briheet Singh Yadav`}>
+<Layout
+  title="Work Experience | Briheet Singh Yadav"
+  description="Work experience of Briheet Singh Yadav, a software engineer working on systems, infrastructure, AI inference and low-latency backends in Rust and Go."
+>
   <div class="min-h-screen">
     <Nav />
 
     <main class="mx-auto mt-0 max-w-5xl px-6">
+      <h1 class="sr-only">Work experience of Briheet Singh Yadav</h1>
       <article class="blog-content max-w-none text-base leading-7 text-zinc-300">
         <Content />
       </article>

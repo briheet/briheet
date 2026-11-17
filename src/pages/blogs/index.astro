@@ -17,16 +17,20 @@ const formatDate = (date: Date) => {
 };
 ---
 
-<Layout title="Blogs | Briheet Singh Yadav">
+<Layout
+  title="Blog | Briheet Singh Yadav"
+  description="Writing by Briheet Singh Yadav on systems and infrastructure: microVMs, KVM and Firecracker, GPU passthrough, Rust and Go performance, databases and Nix."
+>
   <div class="min-h-screen">
     <Nav />
 
     <main class="mx-auto mt-0 max-w-5xl px-6">
+      <h1 class="sr-only">Blog posts by Briheet Singh Yadav</h1>
       <section class="divide-y divide-white/10">
         {
           posts.map((post) => (
             <article class="py-7 first:pt-0">
-              <div class="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-zinc-500">
+              <div class="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-zinc-400">
                 <time datetime={post.data.date.toISOString()}>
                   {formatDate(post.data.date)}
                 </time>

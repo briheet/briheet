@@ -3,7 +3,8 @@
 .blog-content h1,
 .blog-content h2,
 .blog-content h3,
-.blog-content h4 {
+.blog-content h4,
+.blog-content .md-h4 {
   color: white;
   font-weight: 600;
   letter-spacing: 0;
@@ -29,6 +30,32 @@
 }
 
 .blog-content h4 {
+  font-size: 1.125rem;
+  margin-top: 1.75rem;
+  margin-bottom: 0.625rem;
+}
+
+/* Markdown headings render one level lower (see src/lib/shift-headings.mjs);
+   the md-hN class keeps the size of the level written in the markdown. */
+.blog-content .md-h1 {
+  font-size: 1.875rem;
+  margin-top: 3rem;
+  margin-bottom: 1rem;
+}
+
+.blog-content .md-h2 {
+  font-size: 1.5rem;
+  margin-top: 2.5rem;
+  margin-bottom: 0.875rem;
+}
+
+.blog-content .md-h3 {
+  font-size: 1.25rem;
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+.blog-content .md-h4 {
   font-size: 1.125rem;
   margin-top: 1.75rem;
   margin-bottom: 0.625rem;
@@ -139,4 +166,11 @@
 .blog-content td {
   border: 1px solid rgb(39 39 42);
   padding: 0.5rem 0.75rem;
+}
+
+/* Code comments: the highlighting theme (github-dark) uses #6a737d, which is
+   only 3.04:1 on its #24292e background. #959da5, from the same palette,
+   is 5.34:1 and passes WCAG AA. */
+.blog-content pre span[style*="#6a737d" i] {
+  color: #959da5 !important;
 }

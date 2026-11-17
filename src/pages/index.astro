@@ -3,9 +3,31 @@ import Layout from '../layouts/Layout.astro'
 import Nav from '../components/Nav.astro'
 import Footer from '../components/Footer.astro'
 import Main from '../components/Main.astro'
+import { SITE_URL, person } from '../lib/seo'
+
+const description =
+  "Briheet Singh Yadav is a systems and infrastructure engineer building microVM runtimes on KVM, GPU passthrough, AI inference and low-latency backends in Rust, Go and Nix.";
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    person,
+    {
+      "@type": "WebSite",
+      "@id": `${SITE_URL}/#website`,
+      url: `${SITE_URL}/`,
+      name: "Briheet Singh Yadav",
+      author: { "@id": `${SITE_URL}/#person` },
+    },
+  ],
+};
 ---
 
-<Layout title="briheet's site">
+<Layout
+  title="Briheet Singh Yadav — Systems & Infrastructure Engineer"
+  description={description}
+  jsonLd={jsonLd}
+>
   <div class="min-h-screen">
     <Nav />
 

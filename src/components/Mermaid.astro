@@ -1,13 +1,16 @@
 <script>
-  import mermaid from "mermaid";
-
-  mermaid.initialize({
-    startOnLoad: false,
-    theme: "dark",
-  });
-
+  // Mermaid is large, so it is only downloaded when a diagram is about to
+  // scroll into view (or immediately if the browser lacks IntersectionObserver).
   const renderMermaid = async () => {
     const blocks = [...document.querySelectorAll(".blog-content code.language-mermaid")];
+    if (blocks.length === 0) return;
+
+    const { default: mermaid } = await import("mermaid");
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: "dark",
+    });
+
     const diagrams = blocks.map((code, index) => {
       const diagram = document.createElement("div");
       diagram.className = "mermaid-diagram";
@@ -17,12 +20,33 @@
       return diagram;
     });
 
-    if (diagrams.length > 0) {
-      await mermaid.run({ nodes: diagrams });
-    }
+    await mermaid.run({ nodes: diagrams });
   };
 
-  renderMermaid().catch((error) => {
-    console.error("Unable to render Mermaid diagrams", error);
-  });
+  const start = () => {
+    renderMermaid().catch((error) => {
+      console.error("Unable to render Mermaid diagrams", error);
+    });
+  };
+
+  const targets = [...document.querySelectorAll(".blog-content code.language-mermaid")]
+    .map((code) => code.parentElement)
+    .filter((el): el is HTMLElement => el !== null);
+
+  if (targets.length > 0) {
+    if ("IntersectionObserver" in window) {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (entries.some((entry) => entry.isIntersecting)) {
+            observer.disconnect();
+            start();
+          }
+        },
+        { rootMargin: "1000px 0px" },
+      );
+      targets.forEach((el) => observer.observe(el));
+    } else {
+      start();
+    }
+  }
 </script>

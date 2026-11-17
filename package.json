@@ -9,6 +9,7 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
+    "lhci": "astro build && lhci autorun",
     "tui": "cd tui && go run ./cmd/portfolio",
     "tui:generate": "cd tui && go generate ./...",
     "tui:ssh": "cd tui && go run ./cmd/portfolio-ssh",
@@ -16,6 +17,9 @@
     "astro": "astro"
   },
   "dependencies": {
+    "@astrojs/markdown-satteri": "0.3.7",
+    "@astrojs/rss": "4.0.19",
+    "@astrojs/sitemap": "3.7.4",
     "@tailwindcss/vite": "4.3.3",
     "astro": "7.2.4",
     "js-yaml": "^4.3.1",
@@ -24,6 +28,7 @@
     "vite": "8.2.2"
   },
   "devDependencies": {
+    "@lhci/cli": "0.16.1",
     "dompurify": "^3.4.14",
     "sharp": "^0.35.3",
     "svgo": "^4.0.2"
