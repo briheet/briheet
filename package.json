@@ -10,10 +10,6 @@
     "build": "astro build",
     "preview": "astro preview",
     "lhci": "astro build && lhci autorun",
-    "tui": "cd tui && go run ./cmd/portfolio",
-    "tui:generate": "cd tui && go generate ./...",
-    "tui:ssh": "cd tui && go run ./cmd/portfolio-ssh",
-    "tui:test": "cd tui && go test ./...",
     "astro": "astro"
   },
   "dependencies": {
