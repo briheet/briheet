@@ -70,6 +70,11 @@ const gaId = import.meta.env.PUBLIC_GA_ID;
 
 		{jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
 
+		<!-- Prefetch same-site pages on hover/pointerdown. No JS shipped; browsers without support ignore it. -->
+		<script is:inline type="speculationrules">
+			{"prefetch":[{"where":{"href_matches":"/*"},"eagerness":"moderate"}]}
+		</script>
+
 		{gaId && (
 			<>
 				<script async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}></script>
