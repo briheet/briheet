@@ -5,6 +5,10 @@ description: Work experience in latest-to-oldest order.
 
 This page includes my work experience over time. This is in latest-to-oldest order.
 
+## Invideo
+
+**Place**: Mumbai, India
+
 ## Cozy.Art
 
 **Place**: Remote (Denver, Colorado, United States) \
@@ -24,7 +28,7 @@ This page includes my work experience over time. This is in latest-to-oldest ord
 
 **Place**: Remote (London, United Kingdom) \
 **Type**: Part time \
-**Timeline**: Feb 2025 - April 2025 \
+**Timeline**: Feb 2026 - April 2026 \
 **Position**: Engineer \
 **Work**:
 
